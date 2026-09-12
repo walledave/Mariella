@@ -405,3 +405,27 @@ button.linkish:hover { color: var(--accent); }
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ---------- Bild-Status im Formular ---------- */
+
+.imgstatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  font-size: .86rem;
+  color: var(--muted);
+}
+
+.imgstatus img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 7px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+
+.imgstatus.found #image-status-text { color: var(--ok); font-weight: 500; }
+.imgstatus.failed #image-status-text { color: var(--accent); }

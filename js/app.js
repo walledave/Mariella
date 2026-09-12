@@ -18,6 +18,8 @@
     panel: $("admin-panel"), form: $("wish-form"), heading: $("form-heading"),
     msg: $("form-msg"), submit: $("submit-btn"), cancel: $("cancel-edit"), editId: $("edit-id"),
     fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"), fImage: $("f-image"),
+    imgStatus: $("image-status"), imgPreview: $("image-preview"),
+    imgText: $("image-status-text"), imgManual: $("image-manual"), imgRow: $("image-row"),
     login: $("login"), loginOpen: $("login-open"), loginForm: $("login-form"),
     loginPw: $("login-pw"), loginCancel: $("login-cancel"), loginMsg: $("login-msg")
   };
@@ -105,6 +107,79 @@
     el.msg.textContent = text || "";
     el.msg.className = "form-msg" + (kind ? " " + kind : "");
   }
+
+  /* ---------- Bild automatisch aus dem Shop-Link ---------- */
+
+  var lastLookedUp = "";
+
+  function lookupImage(pageUrl) {
+    var ctrl = new AbortController();
+    var timer = window.setTimeout(function () { ctrl.abort(); }, 9000);
+    return fetch("https://api.microlink.io/?url=" + encodeURIComponent(pageUrl), { signal: ctrl.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var d = (j && j.data) || {};
+        var found = (d.image && d.image.url) || (d.logo && d.logo.url) || null;
+        return safeUrl(found);
+      })
+      .catch(function () { return null; })
+      .then(function (v) { window.clearTimeout(timer); return v; });
+  }
+
+  function setImageStatus(state, text, imageUrl) {
+    el.imgStatus.hidden = false;
+    el.imgStatus.className = "imgstatus" + (state ? " " + state : "");
+    el.imgText.textContent = text;
+    if (imageUrl) {
+      el.imgPreview.src = imageUrl;
+      el.imgPreview.hidden = false;
+    } else {
+      el.imgPreview.removeAttribute("src");
+      el.imgPreview.hidden = true;
+    }
+    el.imgManual.hidden = (state === "found");
+  }
+
+  function clearImageStatus() {
+    el.imgStatus.hidden = true;
+    el.imgStatus.className = "imgstatus";
+    el.imgPreview.removeAttribute("src");
+    el.imgPreview.hidden = true;
+    el.imgRow.hidden = true;
+    lastLookedUp = "";
+  }
+
+  function tryLookup() {
+    var link = safeUrl(el.fLink.value);
+    if (!link) { if (!el.fImage.value) clearImageStatus(); return Promise.resolve(); }
+    if (link === lastLookedUp) return Promise.resolve();
+    lastLookedUp = link;
+
+    setImageStatus("", "Suche das Produktbild …", null);
+    return lookupImage(link).then(function (img) {
+      if (safeUrl(el.fLink.value) !== link) return;   // Link wurde inzwischen geändert
+      if (img) {
+        el.fImage.value = img;
+        setImageStatus("found", "Bild gefunden", img);
+      } else {
+        setImageStatus("failed", "Kein Bild gefunden – du kannst eins selbst eintragen.", null);
+        el.imgRow.hidden = false;
+      }
+    });
+  }
+
+  el.fLink.addEventListener("change", function () { tryLookup(); });
+  el.fLink.addEventListener("blur", function () { tryLookup(); });
+
+  el.imgManual.addEventListener("click", function () {
+    el.imgRow.hidden = false;
+    el.fImage.focus();
+  });
+
+  el.fImage.addEventListener("change", function () {
+    var v = safeUrl(el.fImage.value);
+    if (v) setImageStatus("found", "Bild gesetzt", v);
+  });
 
   /* ---------- Admin-Modus ---------- */
 
@@ -357,6 +432,7 @@
 
   function resetForm() {
     el.form.reset();
+    clearImageStatus();
     el.editId.value = "";
     el.heading.textContent = "Neuer Wunsch";
     el.submit.textContent = "Hinzufügen";
@@ -372,6 +448,11 @@
     el.fLink.value = w.link || "";
     el.fPrice.value = w.price || "";
     el.fImage.value = w.image_url || "";
+    clearImageStatus();
+    lastLookedUp = safeUrl(w.link) || "";
+    if (safeUrl(w.image_url)) {
+      setImageStatus("found", "Bild vorhanden", safeUrl(w.image_url));
+    }
     el.heading.textContent = "Wunsch bearbeiten";
     el.submit.textContent = "Speichern";
     el.cancel.hidden = false;
@@ -384,6 +465,15 @@
     e.preventDefault();
     if (!admin) return;
 
+    el.submit.disabled = true;
+    var pending = (!el.fImage.value && safeUrl(el.fLink.value))
+      ? (setMsg("Suche das Produktbild …"), tryLookup())
+      : Promise.resolve();
+
+    pending.then(doSave);
+  });
+
+  function doSave() {
     var id = el.editId.value;
     var args = {
       pw: pw,
@@ -393,7 +483,6 @@
       p_image_url: el.fImage.value
     };
 
-    el.submit.disabled = true;
     setMsg("Speichern …");
 
     var call = id
@@ -414,7 +503,7 @@
         }
       })
       .then(function () { el.submit.disabled = false; });
-  });
+  }
 
   el.cancel.addEventListener("click", resetForm);
 

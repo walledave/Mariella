@@ -53,11 +53,17 @@
           <input id="f-price" name="price" type="text" maxlength="40" placeholder="49">
         </div>
         <div class="field grow">
-          <label for="f-link">Link zum Shop</label>
+          <label for="f-link">Link zum Shop <span class="hint">(Bild wird daraus geholt)</span></label>
           <input id="f-link" name="link" type="url" maxlength="600" placeholder="https://…">
         </div>
       </div>
-      <div class="field">
+      <div class="imgstatus" id="image-status" hidden>
+        <img id="image-preview" alt="" hidden>
+        <span id="image-status-text"></span>
+        <button type="button" class="linkish" id="image-manual">Bild selbst angeben</button>
+      </div>
+
+      <div class="field" id="image-row" hidden>
         <label for="f-image">Bild-URL <span class="hint">(Rechtsklick aufs Produktbild → „Bildadresse kopieren")</span></label>
         <input id="f-image" name="image_url" type="url" maxlength="600" placeholder="https://…jpg">
       </div>
