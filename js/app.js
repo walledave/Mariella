@@ -37,15 +37,6 @@
 
   /* Parallaxe auf dem Titelblock, nicht auf dem Bild: das Wandbild soll in
      jeder Fensterbreite unbeschnitten und unverschoben stehen bleiben.     */
-  /* Am Seitenende steht das ganze Wandbild noch einmal – dann blendet der
-     feste Hintergrund aus, damit das Motiv nicht doppelt zu sehen ist.      */
-  var finale = document.querySelector(".finale");
-  if (finale && "IntersectionObserver" in window) {
-    new window.IntersectionObserver(function (entries) {
-      document.documentElement.classList.toggle("am-ende", entries[0].isIntersecting);
-    }, { rootMargin: "0px 0px -25% 0px" }).observe(finale);
-  }
-
   var heroText = document.querySelector(".hero-text");
   if (heroText && !reduceMotion) {
     var ticking = false;
@@ -81,8 +72,7 @@
     fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"), fImage: $("f-image"),
     fNote: $("f-note"),
     imgStatus: $("image-status"), imgPreview: $("image-preview"),
-    imgText: $("image-status-text"), imgManual: $("image-manual"),
-    imgRefresh: $("image-refresh"), imgRow: $("image-row"),
+    imgText: $("image-status-text"), imgManual: $("image-manual"), imgRow: $("image-row"),
     login: $("login"), loginOpen: $("login-open"), loginForm: $("login-form"),
     loginPw: $("login-pw"), loginCancel: $("login-cancel"), loginMsg: $("login-msg")
   };
@@ -203,13 +193,18 @@
     var ctrl = new AbortController();
     var timer = window.setTimeout(function () { ctrl.abort(); }, 9000);
     return fetch("https://api.microlink.io/?url=" + encodeURIComponent(pageUrl), { signal: ctrl.signal })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        var d = (j && j.data) || {};
-        var found = safeUrl((d.image && d.image.url) || null);
-        return (found && !looksLikeLogo(found)) ? found : null;
+      .then(function (r) {
+        return r.json().then(function (j) { return { http: r.status, j: j }; });
       })
-      .catch(function () { return "ERROR"; })
+      .then(function (res) {
+        var j = res.j || {};
+        if (res.http === 429 || j.code === "ERATE") return { code: "limit" };
+        var d = j.data || {};
+        var found = safeUrl((d.image && d.image.url) || null);
+        if (found && !looksLikeLogo(found)) return { code: "ok", url: found };
+        return { code: "none" };
+      })
+      .catch(function () { return { code: "error" }; })
       .then(function (v) { window.clearTimeout(timer); return v; });
   }
 
@@ -225,8 +220,7 @@
       el.imgPreview.removeAttribute("src");
       el.imgPreview.hidden = true;
     }
-    if (el.imgManual) el.imgManual.hidden = (state === "found");
-    if (el.imgRefresh) el.imgRefresh.hidden = !safeUrl(el.fLink.value);
+    if (el.imgManual) el.imgManual.hidden = false;   // immer anbieten
   }
 
   function clearImageStatus() {
@@ -246,29 +240,26 @@
     lastLookedUp = link;
 
     setImageStatus("", "Suche das Produktbild …", null);
-    return lookupImage(link).then(function (img) {
+    return lookupImage(link).then(function (res) {
       if (safeUrl(el.fLink.value) !== link) return;   // Link wurde inzwischen geändert
-      if (img && img !== "ERROR") {
-        el.fImage.value = img;
-        setImageStatus("found", "Bild gefunden", img);
-      } else {
-        setImageStatus("failed", img === "ERROR"
-          ? "Bilddienst nicht erreichbar (Werbeblocker?) – bitte Bild selbst eintragen."
-          : "Der Shop liefert kein Produktbild – im Shop Rechtsklick aufs Bild, Bildadresse kopieren und unten einfügen.", null);
-        if (el.imgRow) el.imgRow.hidden = false;
+
+      if (res.code === "ok") {
+        el.fImage.value = res.url;
+        setImageStatus("found", "Bild gefunden", res.url);
+        return;
       }
+
+      setImageStatus("failed",
+        res.code === "limit" ? "Tageslimit der automatischen Bildsuche erreicht – bitte Bild selbst angeben."
+      : res.code === "error" ? "Bildsuche nicht erreichbar – bitte Bild selbst angeben."
+      :                        "Kein Produktbild gefunden – bitte Bild selbst angeben.", null);
+      if (el.imgRow) el.imgRow.hidden = false;
+      el.fImage.focus();
     }).catch(function () {});
   }
 
   el.fLink.addEventListener("change", function () { tryLookup(); });
   el.fLink.addEventListener("blur", function () { tryLookup(); });
-
-  if (el.imgRefresh) el.imgRefresh.addEventListener("click", function () {
-    el.fImage.value = "";
-    lastLookedUp = "";
-    el.imgRow.hidden = true;
-    tryLookup();
-  });
 
   if (el.imgManual) el.imgManual.addEventListener("click", function () {
     el.imgRow.hidden = false;

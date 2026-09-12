@@ -607,7 +607,7 @@ input[type=text]:focus, input[type=url]:focus, input[type=password]:focus {
    Fußbereich
    ========================================================================== */
 
-footer { padding-top: 56px; text-align: center; color: var(--ink-faint); }
+footer { padding-top: 28px; padding-bottom: 12px; text-align: center; color: var(--ink-faint); }
 
 .shell-divider {
   display: block;
@@ -779,43 +779,9 @@ html.js .reveal.in {
 .lock-msg.error { color: var(--rose); font-weight: 600; }
 
 /* ==========================================================================
-   Abschluss: das ganze Wandbild noch einmal am Seitenende
+   Ausklang: freier Raum, damit der Hintergrund unten unverdeckt zu sehen ist
    ========================================================================== */
 
-/* Solange das Abschlussbild sichtbar ist, tritt der Hintergrund zurück */
-.page-art, .bubbles { transition: opacity .8s var(--ease); }
-html.am-ende .page-art,
-html.am-ende .bubbles { opacity: 0; }
-
-.finale {
-  max-width: 1180px;
-  margin: 56px auto 0;
-  padding-inline: 20px;
-  text-align: center;
-}
-
-.finale picture { display: block; }
-
-.finale img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,.8);
-  box-shadow: var(--shadow-lg);
-  background: var(--card);
-}
-
-.finale-text {
-  margin: 14px 0 0;
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.1rem;
-  font-style: italic;
-  color: var(--ink-faint);
-  letter-spacing: .02em;
-}
-
-@media (max-width: 560px) {
-  .finale { margin-top: 40px; }
-  .finale img { border-radius: var(--radius-sm); }
+.ausklang {
+  height: clamp(280px, 48vh, 560px);
 }
