@@ -1,0 +1,17 @@
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node (falls später Build-Tools dazukommen)
+node_modules/
+dist/
+.env
+.env.local
+npm-debug.log*
