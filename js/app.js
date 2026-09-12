@@ -45,9 +45,9 @@
       ticking = true;
       window.requestAnimationFrame(function () {
         var y = window.scrollY || window.pageYOffset || 0;
-        if (y < 620) {
-          heroText.style.transform = "translate3d(0," + (y * 0.22).toFixed(1) + "px,0)";
-          heroText.style.opacity = Math.max(0, 1 - y / 460).toFixed(3);
+        if (y < 560) {
+          heroText.style.transform = "translate3d(0," + (y * 0.18).toFixed(1) + "px,0)";
+          heroText.style.opacity = Math.max(0, 1 - y / 420).toFixed(3);
         }
         ticking = false;
       });

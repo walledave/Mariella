@@ -10,57 +10,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
 
+<div class="page-art" aria-hidden="true">
+  <picture>
+    <source media="(max-width: 640px)" type="image/webp" srcset="assets/wandbild-hoch.webp">
+    <source media="(max-width: 640px)" srcset="assets/wandbild-hoch.jpg">
+    <source type="image/webp"
+            srcset="assets/wandbild-small.webp 1000w, assets/wandbild.webp 1400w"
+            sizes="(min-width: 1120px) 1080px, 100vw">
+    <img src="assets/wandbild.jpg"
+         srcset="assets/wandbild-small.jpg 1000w, assets/wandbild.jpg 1400w"
+         sizes="(min-width: 1120px) 1080px, 100vw"
+         fetchpriority="high" decoding="async" alt="">
+  </picture>
+</div>
+
+<div class="bubbles" aria-hidden="true">
+  <span style="--x:12%; --s:14px; --d:0s"></span>
+  <span style="--x:26%; --s:8px;  --d:-4s"></span>
+  <span style="--x:63%; --s:11px; --d:-7s"></span>
+  <span style="--x:78%; --s:7px;  --d:-2s"></span>
+  <span style="--x:88%; --s:13px; --d:-9s"></span>
+</div>
+
 <header class="hero">
   <div class="hero-text">
-    <p class="eyebrow">Wunschliste</p>
-    <h1>Mariella</h1>
-    <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
-      Mariella selbst sieht nicht, wer was reserviert hat.</p>
+    <h1>Mariellas Wünsche</h1>
+    <p class="lede">Such dir etwas aus und klick auf <strong>Wunsch reservieren</strong> –
+      dazu denkst du dir ein kurzes Passwort aus, mit dem du es später auch wieder
+      freigeben kannst. Durchgestrichenes ist schon vergeben. Mariella sieht nicht,
+      wer was nimmt.</p>
   </div>
-
-  <div class="hero-media">
-    <picture>
-      <!-- Handy: enger Ausschnitt, damit die Tiere groß genug bleiben -->
-      <source media="(max-width: 640px)" type="image/webp" srcset="assets/wandbild-hoch.webp">
-      <source media="(max-width: 640px)" srcset="assets/wandbild-hoch.jpg">
-      <source type="image/webp"
-              srcset="assets/wandbild-small.webp 1000w, assets/wandbild.webp 1400w"
-              sizes="(min-width: 1220px) 1180px, 100vw">
-      <img id="hero-img" src="assets/wandbild.jpg"
-           srcset="assets/wandbild-small.jpg 1000w, assets/wandbild.jpg 1400w"
-           sizes="(min-width: 1220px) 1180px, 100vw" fetchpriority="high" decoding="async"
-           alt="Aquarell-Wandbild aus Mariellas Zimmer: ein Seepferdchen, eine geöffnete Muschel mit Perle und eine Schildkröte zwischen Korallen und Seegras">
-    </picture>
-  </div>
-
-  <div class="bubbles" aria-hidden="true">
-    <span style="--x:12%; --s:14px; --d:0s"></span>
-    <span style="--x:26%; --s:8px;  --d:-4s"></span>
-    <span style="--x:63%; --s:11px; --d:-7s"></span>
-    <span style="--x:78%; --s:7px;  --d:-2s"></span>
-    <span style="--x:88%; --s:13px; --d:-9s"></span>
-  </div>
-
 </header>
 
 <main>
-
-  <section class="stats reveal" id="stats" hidden>
-    <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Wünsche</span></div>
-    <div class="stat"><span class="stat-num" id="stat-open">0</span><span class="stat-label">noch offen</span></div>
-    <div class="stat"><span class="stat-num" id="stat-taken">0</span><span class="stat-label">vergeben</span></div>
-  </section>
-
-  <div class="toolbar reveal" id="toolbar" hidden>
-    <label class="switch">
-      <input type="checkbox" id="hide-taken">
-      <span>Vergebene ausblenden</span>
-    </label>
-  </div>
 
   <div class="adminbar" id="adminbar" hidden>
     <span class="adminbar-label">Admin-Modus</span>
@@ -118,6 +104,19 @@
 
   <p class="empty" id="empty" hidden>Noch keine Wünsche eingetragen.</p>
 
+  <section class="summary reveal" id="stats" hidden aria-label="Übersicht">
+    <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Wünsche</span></div>
+    <div class="stat"><span class="stat-num" id="stat-open">0</span><span class="stat-label">noch offen</span></div>
+    <div class="stat"><span class="stat-num" id="stat-taken">0</span><span class="stat-label">vergeben</span></div>
+  </section>
+
+  <div class="toolbar reveal" id="toolbar" hidden>
+    <label class="switch">
+      <input type="checkbox" id="hide-taken">
+      <span>Vergebene ausblenden</span>
+    </label>
+  </div>
+
 </main>
 
 <footer>
@@ -136,7 +135,7 @@
   </div>
 </footer>
 
-<script src="js/config.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
+<script src="js/config.js?v=12"></script>
+<script src="js/app.js?v=12"></script>
 </body>
 </html>

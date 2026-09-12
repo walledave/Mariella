@@ -57,101 +57,97 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
 ::selection { background: var(--rose-soft); color: var(--ink); }
 
 /* ==========================================================================
-   Hero – Titel auf ruhigem Grund, darunter das Wandbild in voller Breite.
-   Das Bild wird NICHT auf eine feste Höhe beschnitten: Seepferdchen und
-   Schildkröte bleiben in jeder Fensterbreite vollständig sichtbar.
+   Das Wandbild liegt als feste Ebene hinter der ganzen Seite.
+   Oben trägt die leere Wand die Überschrift, darunter bleiben Seepferdchen
+   und Schildkröte sichtbar; die Karten darüber sind leicht durchscheinend.
    ========================================================================== */
+
+.page-art {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 1080px);
+  z-index: -2;
+  pointer-events: none;
+  line-height: 0;
+}
+
+.page-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Schleier: oben fast deckend für die Schrift, in der Bildmitte offen,
+   nach unten hin wieder deckend, damit die Liste ruhig steht. */
+.page-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right,
+      var(--bg) 0%, rgba(250,245,239,.55) 4%,
+      rgba(250,245,239,0) 13%, rgba(250,245,239,0) 87%,
+      rgba(250,245,239,.55) 96%, var(--bg) 100%),
+    linear-gradient(to bottom,
+      rgba(250,245,239,.93) 0%,
+      rgba(250,245,239,.90) 22%,
+      rgba(250,245,239,.78) 34%,
+      rgba(250,245,239,.30) 45%,
+      rgba(250,245,239,.30) 70%,
+      rgba(250,245,239,.68) 84%,
+      var(--bg) 97%);
+}
+
+/* Je schmaler das Fenster, desto weniger Kopffreiheit hat das Bild –
+   also rutscht es nach unten, damit der Text auf ruhigem Grund steht. */
+@media (max-width: 900px) { .page-art { top: clamp(30px, 7vw, 80px); } }
+@media (max-width: 640px) { .page-art { top: clamp(96px, 24vw, 150px); } }
+
+/* ---------- Kopfbereich: nur noch Titel und Kurzerklärung ---------- */
 
 .hero {
   position: relative;
-  isolation: isolate;
-  padding-top: clamp(48px, 8vw, 88px);
   text-align: center;
-  overflow: hidden;
+  padding: clamp(34px, 5.5vw, 56px) 20px 0;
+  min-height: clamp(330px, 48vh, 470px);
 }
 
 .hero-text {
-  position: relative;
-  z-index: 1;
-  max-width: 40ch;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 0 20px clamp(14px, 3vw, 26px);
   will-change: transform;
 }
 
-.eyebrow {
-  margin: 0;
-  font-size: .72rem;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-  color: var(--rose);
-  font-weight: 600;
-}
-
 .hero h1 {
-  margin: .12em 0 .2em;
+  margin: 0 0 .3em;
   font-family: "Cormorant Garamond", Iowan Old Style, Palatino, Georgia, serif;
   font-weight: 600;
-  font-size: clamp(3.2rem, 12vw, 5.4rem);
-  line-height: .95;
+  font-size: clamp(2.3rem, 7.6vw, 3.6rem);
+  line-height: 1;
   letter-spacing: -.015em;
   color: var(--ink);
 }
 
 .lede {
   margin: 0 auto;
-  max-width: 38ch;
+  max-width: 43ch;
   color: var(--ink-soft);
-  font-size: clamp(.94rem, 2.4vw, 1.02rem);
+  font-size: clamp(.9rem, 2.2vw, .97rem);
+  line-height: 1.6;
 }
 
-/* --- Das Bild ------------------------------------------------------------
-   Grundfall: volle Breite, Höhe ergibt sich aus dem Bild -> kein Beschnitt.
-   Erst bei sehr breiten Fenstern greift die Höhenbremse; dann wird um die
-   Bildmitte herum beschnitten, also genau um die Tiere.                    */
-
-.hero-media {
-  position: relative;
-  width: 100%;
-  max-width: 1180px;      /* begrenzt die Breite statt das Bild zu beschneiden */
-  margin-inline: auto;
-  line-height: 0;
-}
-
-.hero-media img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: min(78vh, 680px);   /* Notbremse für sehr flache Fenster */
-  object-fit: cover;
-  object-position: 50% 50%;
-}
-
-/* Weiche Kanten, damit das Foto in den Seitenhintergrund übergeht */
-.hero-media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom,
-      var(--bg) 0%,
-      rgba(250,245,239,.55) 7%,
-      rgba(250,245,239,0) 16%,
-      rgba(250,245,239,0) 72%,
-      rgba(250,245,239,.80) 93%,
-      var(--bg) 100%),
-    linear-gradient(to right,
-      var(--bg) 0%,
-      rgba(250,245,239,.45) 4%,
-      rgba(250,245,239,0) 11%,
-      rgba(250,245,239,0) 89%,
-      rgba(250,245,239,.45) 96%,
-      var(--bg) 100%);
-}
+.lede strong { color: var(--rose); font-weight: 600; }
 
 /* Perlen, die langsam aufsteigen */
-.bubbles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
 
 .bubbles span {
   position: absolute;
@@ -171,23 +167,23 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   0%   { transform: translateY(0) scale(.85);      opacity: 0; }
   12%  {                                            opacity: .75; }
   85%  {                                            opacity: .35; }
-  100% { transform: translateY(-70vh) scale(1.12); opacity: 0; }
+  100% { transform: translateY(-100vh) scale(1.12); opacity: 0; }
 }
 
 /* ==========================================================================
    Kennzahlen
    ========================================================================== */
 
-.stats {
+.summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin: clamp(-30px, -2.4vw, -12px) 0 22px;
-  position: relative;
+  margin: 34px 0 16px;
 }
 
 .stat {
-  background: var(--card);
+  background: rgba(255,253,250,.86);
+  backdrop-filter: blur(7px);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -227,8 +223,9 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   padding-inline: 4px;
+  justify-content: center;
 }
 
 .switch {
@@ -339,7 +336,8 @@ button.linkish:hover { color: var(--rose); }
 }
 
 .panel {
-  background: var(--card);
+  background: rgba(255,253,250,.93);
+  backdrop-filter: blur(9px);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -460,8 +458,9 @@ input[type=text]:focus, input[type=url]:focus, input[type=password]:focus {
   grid-template-columns: 92px 1fr auto;
   gap: 18px;
   align-items: center;
-  background: var(--card);
-  border: 1px solid var(--border-soft);
+  background: rgba(255,253,250,.90);
+  backdrop-filter: blur(9px);
+  border: 1px solid rgba(255,255,255,.7);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px 18px;
@@ -478,7 +477,7 @@ input[type=text]:focus, input[type=url]:focus, input[type=password]:focus {
 .wish.no-image { grid-template-columns: 1fr auto; }
 
 .wish.taken {
-  background: var(--bg-deep);
+  background: rgba(243,235,224,.88);
   box-shadow: var(--shadow-sm);
   border-color: var(--border);
 }
@@ -673,9 +672,9 @@ html.js .reveal.in {
    ========================================================================== */
 
 @media (max-width: 560px) {
-  .hero-media img { max-height: min(52vh, 420px); }
+  .hero { min-height: clamp(330px, 48vh, 430px); padding-top: 30px; }
 
-  .stats { gap: 8px; margin-top: -14px; }
+  .summary { gap: 8px; margin-top: 26px; }
   .stat { padding: 14px 6px 12px; }
   .stat-num { font-size: 1.75rem; }
   .stat-label { font-size: .71rem; }
