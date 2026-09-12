@@ -156,3 +156,26 @@ grant execute on function public.set_reserved(uuid, boolean) to anon, authentica
 grant execute on function public.add_wish(text, text, text, text, text) to anon, authenticated;
 grant execute on function public.delete_wish(text, uuid) to anon, authenticated;
 grant execute on function public.edit_wish(text, uuid, text, text, text, text) to anon, authenticated;
+
+-- ---------- Härtung (defense in depth) ----------------------
+-- RLS blockt schon alles; zusätzlich die Tabellenrechte entziehen,
+-- damit ein versehentlich gelockertes Policy-Setup nicht sofort durchschlägt.
+
+revoke all on table public.app_secret from anon, authenticated;
+revoke insert, update, delete on table public.wishes from anon, authenticated;
+
+-- ---------- Admin-Login ------------------------------------
+-- Prüft nur, ob das Passwort stimmt (für den Admin-Modus der Seite).
+
+create or replace function public.check_login(pw text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+begin
+  return public.check_password(pw);
+end;
+$$;
+
+grant execute on function public.check_login(text) to anon, authenticated;

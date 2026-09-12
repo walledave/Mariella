@@ -3,8 +3,11 @@
 Statische Seite auf GitHub Pages, Daten in Supabase.
 
 * **Lesen und reservieren** darf jede:r mit dem Link – anonym, ohne Login.
-* **Hinzufügen, bearbeiten, löschen** nur mit Passwort. Das Passwort wird
-  serverseitig in Postgres geprüft (bcrypt), steht also nirgends im Quellcode.
+* **Hinzufügen, bearbeiten, löschen** nur im Admin-Modus: unten auf der Seite
+  über „Verwalten" mit Passwort anmelden. Gäste sehen davon nichts.
+  Das Passwort wird serverseitig in Postgres geprüft (bcrypt), steht also
+  nirgends im Quellcode. Die Anmeldung bleibt im Browser gespeichert,
+  bis man auf „Abmelden" klickt.
 
 ## Einrichtung
 

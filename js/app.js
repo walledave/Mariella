@@ -6,6 +6,7 @@
   var URL_BASE = (CFG.SUPABASE_URL || "").replace(/\/+$/, "");
   var KEY = CFG.SUPABASE_ANON_KEY || "";
   var CONFIGURED = /^https:\/\/.+\.supabase\.co$/.test(URL_BASE) && KEY.length > 20;
+  var STORE_KEY = "wl-admin-pw";
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -13,24 +14,32 @@
     list: $("list"), empty: $("empty"), notice: $("notice"),
     stats: $("stats"), total: $("stat-total"), open: $("stat-open"), taken: $("stat-taken"),
     toolbar: $("toolbar"), hideTaken: $("hide-taken"),
-    adminToggle: $("admin-toggle"), panel: $("admin-panel"),
-    form: $("wish-form"), heading: $("form-heading"), msg: $("form-msg"),
-    submit: $("submit-btn"), cancel: $("cancel-edit"), editId: $("edit-id"),
-    fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"),
-    fImage: $("f-image"), fPw: $("f-pw")
+    adminbar: $("adminbar"), adminToggle: $("admin-toggle"), logout: $("logout"),
+    panel: $("admin-panel"), form: $("wish-form"), heading: $("form-heading"),
+    msg: $("form-msg"), submit: $("submit-btn"), cancel: $("cancel-edit"), editId: $("edit-id"),
+    fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"), fImage: $("f-image"),
+    login: $("login"), loginOpen: $("login-open"), loginForm: $("login-form"),
+    loginPw: $("login-pw"), loginCancel: $("login-cancel"), loginMsg: $("login-msg")
   };
 
   var wishes = [];
   var busy = {};
+  var admin = false;
+  var pw = "";
+
+  /* ---------- Speicher ---------- */
+
+  function storedPw() {
+    try { return localStorage.getItem(STORE_KEY) || ""; } catch (e) { return ""; }
+  }
+  function storePw(value) {
+    try {
+      if (value) localStorage.setItem(STORE_KEY, value);
+      else localStorage.removeItem(STORE_KEY);
+    } catch (e) {}
+  }
 
   /* ---------- Hilfsfunktionen ---------- */
-
-  function remembered() {
-    try { return sessionStorage.getItem("wl-pw") || ""; } catch (e) { return ""; }
-  }
-  function remember(pw) {
-    try { sessionStorage.setItem("wl-pw", pw); } catch (e) {}
-  }
 
   function safeUrl(raw) {
     if (!raw) return null;
@@ -43,6 +52,12 @@
   function hostOf(href) {
     try { return new window.URL(href).hostname.replace(/^www\./, ""); }
     catch (e) { return "Link"; }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
   }
 
   function api(path, options) {
@@ -63,7 +78,6 @@
         if (!res.ok) {
           var err = new Error((data && data.message) || ("HTTP " + res.status));
           err.status = res.status;
-          err.payload = data;
           throw err;
         }
         return data;
@@ -84,6 +98,70 @@
     el.msg.textContent = text || "";
     el.msg.className = "form-msg" + (kind ? " " + kind : "");
   }
+
+  /* ---------- Admin-Modus ---------- */
+
+  function enterAdmin(password) {
+    admin = true;
+    pw = password;
+    storePw(password);
+    el.adminbar.hidden = false;
+    el.login.hidden = true;
+    render();
+  }
+
+  function leaveAdmin() {
+    admin = false;
+    pw = "";
+    storePw("");
+    el.adminbar.hidden = true;
+    el.panel.hidden = true;
+    el.login.hidden = false;
+    el.loginForm.hidden = true;
+    el.loginOpen.hidden = false;
+    el.loginPw.value = "";
+    el.loginMsg.textContent = "";
+    render();
+  }
+
+  el.loginOpen.addEventListener("click", function () {
+    el.loginForm.hidden = false;
+    el.loginOpen.hidden = true;
+    el.loginPw.focus();
+  });
+
+  el.loginCancel.addEventListener("click", function () {
+    el.loginForm.hidden = true;
+    el.loginOpen.hidden = false;
+    el.loginPw.value = "";
+    el.loginMsg.textContent = "";
+  });
+
+  el.loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var value = el.loginPw.value;
+    if (!value) return;
+    el.loginMsg.className = "login-msg";
+    el.loginMsg.textContent = "Prüfe …";
+    rpc("check_login", { pw: value })
+      .then(function (ok) {
+        if (ok === true) {
+          el.loginMsg.textContent = "";
+          el.loginPw.value = "";
+          enterAdmin(value);
+          el.adminbar.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          el.loginMsg.className = "login-msg error";
+          el.loginMsg.textContent = "Falsches Passwort.";
+        }
+      })
+      .catch(function (err) {
+        el.loginMsg.className = "login-msg error";
+        el.loginMsg.textContent = "Fehler: " + err.message;
+      });
+  });
+
+  el.logout.addEventListener("click", leaveAdmin);
 
   /* ---------- Rendern ---------- */
 
@@ -161,9 +239,9 @@
     toggle.addEventListener("click", function () { onToggle(w); });
     actions.appendChild(toggle);
 
-    if (remembered()) {
-      var admin = document.createElement("div");
-      admin.className = "admin-row";
+    if (admin) {
+      var row = document.createElement("div");
+      row.className = "admin-row";
 
       var edit = document.createElement("button");
       edit.type = "button";
@@ -177,9 +255,9 @@
       del.textContent = "Löschen";
       del.addEventListener("click", function () { onDelete(w); });
 
-      admin.appendChild(edit);
-      admin.appendChild(del);
-      actions.appendChild(admin);
+      row.appendChild(edit);
+      row.appendChild(del);
+      actions.appendChild(row);
     }
 
     card.appendChild(actions);
@@ -215,16 +293,8 @@
         el.list.textContent = "";
         el.empty.hidden = true;
         showNotice("<strong>Die Liste konnte nicht geladen werden.</strong><br>" +
-          escapeHtml(err.message) +
-          "<br><br>Prüfe in Supabase, ob das Schema ausgeführt wurde und die Werte in " +
-          "<code>js/config.js</code> stimmen.");
+          escapeHtml(err.message));
       });
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
   }
 
   function onToggle(w) {
@@ -233,7 +303,7 @@
 
     busy[w.id] = true;
     var next = !w.reserved;
-    w.reserved = next;            // optimistisch
+    w.reserved = next;
     render();
 
     rpc("set_reserved", { p_id: w.id, p_value: next })
@@ -247,13 +317,20 @@
   }
 
   function onDelete(w) {
-    var pw = remembered();
-    if (!pw) return;
+    if (!admin) return;
     if (!window.confirm('"' + w.title + '" wirklich löschen?')) return;
-
     rpc("delete_wish", { pw: pw, p_id: w.id })
       .then(load)
-      .catch(function (err) { window.alert("Löschen fehlgeschlagen: " + err.message); });
+      .catch(function (err) { handleAdminError(err, "Löschen fehlgeschlagen"); });
+  }
+
+  function handleAdminError(err, prefix) {
+    if (/Passwort/i.test(err.message || "")) {
+      window.alert("Das Passwort stimmt nicht mehr. Bitte neu anmelden.");
+      leaveAdmin();
+    } else {
+      window.alert(prefix + ": " + err.message);
+    }
   }
 
   /* ---------- Formular ---------- */
@@ -261,8 +338,7 @@
   function openPanel() {
     el.panel.hidden = false;
     el.adminToggle.textContent = "Formular schließen";
-    el.fPw.value = remembered();
-    (remembered() ? el.fTitle : el.fPw).focus();
+    el.fTitle.focus();
   }
 
   function closePanel() {
@@ -277,7 +353,6 @@
     el.heading.textContent = "Neuer Wunsch";
     el.submit.textContent = "Hinzufügen";
     el.cancel.hidden = true;
-    el.fPw.value = remembered();
     setMsg("");
   }
 
@@ -289,7 +364,6 @@
     el.fLink.value = w.link || "";
     el.fPrice.value = w.price || "";
     el.fImage.value = w.image_url || "";
-    el.fPw.value = remembered();
     el.heading.textContent = "Wunsch bearbeiten";
     el.submit.textContent = "Speichern";
     el.cancel.hidden = false;
@@ -300,7 +374,8 @@
 
   el.form.addEventListener("submit", function (e) {
     e.preventDefault();
-    var pw = el.fPw.value;
+    if (!admin) return;
+
     var id = el.editId.value;
     var args = {
       pw: pw,
@@ -318,14 +393,17 @@
       : rpc("add_wish", args);
 
     call.then(function () {
-        remember(pw);
         setMsg(id ? "Gespeichert." : "Hinzugefügt.", "ok");
         resetForm();
         return load();
       })
       .catch(function (err) {
-        var m = err.message || "";
-        setMsg(/Passwort/i.test(m) ? "Falsches Passwort." : ("Fehler: " + m), "error");
+        if (/Passwort/i.test(err.message || "")) {
+          setMsg("Das Passwort stimmt nicht mehr – bitte neu anmelden.", "error");
+          leaveAdmin();
+        } else {
+          setMsg("Fehler: " + err.message, "error");
+        }
       })
       .then(function () { el.submit.disabled = false; });
   });
@@ -342,23 +420,25 @@
 
   if (!CONFIGURED) {
     showNotice(
-      "<strong>Fast fertig – es fehlen noch die Supabase-Zugangsdaten.</strong><br>" +
+      "<strong>Es fehlen noch die Supabase-Zugangsdaten.</strong><br>" +
       "Trage in <code>js/config.js</code> die <code>Project URL</code> und den " +
-      "<code>anon public</code>-Key aus dem Supabase-Dashboard ein " +
-      "(Project Settings → API), committe und pushe."
+      "<code>anon public</code>-Key ein."
     );
     el.empty.hidden = true;
+    el.login.hidden = true;
     return;
   }
 
   el.list.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
-  load();
 
-  window.setInterval(function () {
-    if (!document.hidden) load();
-  }, 25000);
-
-  document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) load();
+  load().then(function () {
+    var saved = storedPw();
+    if (!saved) return;
+    return rpc("check_login", { pw: saved })
+      .then(function (ok) { if (ok === true) enterAdmin(saved); else storePw(""); })
+      .catch(function () {});
   });
+
+  window.setInterval(function () { if (!document.hidden) load(); }, 25000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 })();

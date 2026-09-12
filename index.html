@@ -31,7 +31,12 @@
       <input type="checkbox" id="hide-taken">
       <span>Vergebene ausblenden</span>
     </label>
-    <button class="ghost" id="admin-toggle" type="button">Wunsch hinzufügen</button>
+  </div>
+
+  <div class="adminbar" id="adminbar" hidden>
+    <span class="adminbar-label">Admin-Modus</span>
+    <button class="primary small" id="admin-toggle" type="button">Wunsch hinzufügen</button>
+    <button class="ghost small" id="logout" type="button">Abmelden</button>
   </div>
 
   <section class="panel" id="admin-panel" hidden>
@@ -56,10 +61,6 @@
         <label for="f-image">Bild-URL <span class="hint">(Rechtsklick aufs Produktbild → „Bildadresse kopieren")</span></label>
         <input id="f-image" name="image_url" type="url" maxlength="600" placeholder="https://…jpg">
       </div>
-      <div class="field">
-        <label for="f-pw">Passwort <span class="req">*</span></label>
-        <input id="f-pw" name="pw" type="password" required placeholder="••••••••">
-      </div>
       <div class="form-actions">
         <button type="submit" class="primary" id="submit-btn">Hinzufügen</button>
         <button type="button" class="ghost" id="cancel-edit" hidden>Abbrechen</button>
@@ -77,7 +78,18 @@
 </main>
 
 <footer>
-  <small>Reservierungen sind anonym · <a href="https://github.com/walledave/Mariella">Quellcode</a></small>
+  <small>Reservierungen sind anonym</small>
+
+  <div class="login" id="login">
+    <button type="button" class="linkish" id="login-open">Verwalten</button>
+    <form id="login-form" hidden autocomplete="off">
+      <label class="sr-only" for="login-pw">Passwort</label>
+      <input id="login-pw" type="password" placeholder="Passwort" autocomplete="current-password">
+      <button type="submit" class="primary small">Anmelden</button>
+      <button type="button" class="linkish" id="login-cancel">Abbrechen</button>
+      <p class="login-msg" id="login-msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
 </footer>
 
 <script src="js/config.js"></script>
