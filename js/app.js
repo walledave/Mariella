@@ -35,15 +35,20 @@
     for (var i = 0; i < nodes.length; i++) nodes[i].classList.add("in");
   }, 2000);
 
-  var heroImg = document.getElementById("hero-img");
-  if (heroImg && !reduceMotion) {
+  /* Parallaxe auf dem Titelblock, nicht auf dem Bild: das Wandbild soll in
+     jeder Fensterbreite unbeschnitten und unverschoben stehen bleiben.     */
+  var heroText = document.querySelector(".hero-text");
+  if (heroText && !reduceMotion) {
     var ticking = false;
     window.addEventListener("scroll", function () {
       if (ticking) return;
       ticking = true;
       window.requestAnimationFrame(function () {
         var y = window.scrollY || window.pageYOffset || 0;
-        if (y < 1000) heroImg.style.transform = "translate3d(0," + (y * 0.15).toFixed(1) + "px,0)";
+        if (y < 620) {
+          heroText.style.transform = "translate3d(0," + (y * 0.22).toFixed(1) + "px,0)";
+          heroText.style.opacity = Math.max(0, 1 - y / 460).toFixed(3);
+        }
         ticking = false;
       });
     }, { passive: true });

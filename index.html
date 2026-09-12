@@ -10,19 +10,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
 <header class="hero">
-  <div class="hero-media" aria-hidden="true">
+  <div class="hero-text">
+    <p class="eyebrow">Wunschliste</p>
+    <h1>Mariella</h1>
+    <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
+      Mariella selbst sieht nicht, wer was reserviert hat.</p>
+  </div>
+
+  <div class="hero-media">
     <picture>
+      <!-- Handy: enger Ausschnitt, damit die Tiere groß genug bleiben -->
+      <source media="(max-width: 640px)" type="image/webp" srcset="assets/wandbild-hoch.webp">
+      <source media="(max-width: 640px)" srcset="assets/wandbild-hoch.jpg">
       <source type="image/webp"
-              srcset="assets/wandbild-small.webp 800w, assets/wandbild.webp 1600w"
-              sizes="100vw">
+              srcset="assets/wandbild-small.webp 1000w, assets/wandbild.webp 1400w"
+              sizes="(min-width: 1220px) 1180px, 100vw">
       <img id="hero-img" src="assets/wandbild.jpg"
-           srcset="assets/wandbild-small.jpg 800w, assets/wandbild.jpg 1600w"
-           sizes="100vw" alt="" fetchpriority="high" decoding="async">
+           srcset="assets/wandbild-small.jpg 1000w, assets/wandbild.jpg 1400w"
+           sizes="(min-width: 1220px) 1180px, 100vw" fetchpriority="high" decoding="async"
+           alt="Aquarell-Wandbild aus Mariellas Zimmer: ein Seepferdchen, eine geöffnete Muschel mit Perle und eine Schildkröte zwischen Korallen und Seegras">
     </picture>
   </div>
 
@@ -34,12 +45,6 @@
     <span style="--x:88%; --s:13px; --d:-9s"></span>
   </div>
 
-  <div class="hero-content">
-    <p class="eyebrow">Wunschliste</p>
-    <h1>Mariella</h1>
-    <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
-      Mariella selbst sieht nicht, wer was reserviert hat.</p>
-  </div>
 </header>
 
 <main>
@@ -126,7 +131,7 @@
   </div>
 </footer>
 
-<script src="js/config.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/config.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
 </body>
 </html>

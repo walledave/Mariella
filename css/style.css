@@ -57,60 +57,27 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
 ::selection { background: var(--rose-soft); color: var(--ink); }
 
 /* ==========================================================================
-   Hero – das Wandbild als Bühne
+   Hero – Titel auf ruhigem Grund, darunter das Wandbild in voller Breite.
+   Das Bild wird NICHT auf eine feste Höhe beschnitten: Seepferdchen und
+   Schildkröte bleiben in jeder Fensterbreite vollständig sichtbar.
    ========================================================================== */
 
 .hero {
   position: relative;
   isolation: isolate;
-  min-height: clamp(470px, 74vh, 700px);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: clamp(44px, 9vw, 84px) 20px clamp(90px, 16vw, 150px);
+  padding-top: clamp(48px, 8vw, 88px);
   text-align: center;
   overflow: hidden;
 }
 
-.hero-media {
-  position: absolute;
-  inset: -8% 0 0;
-  z-index: -2;
-}
-
-.hero-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 96%;
+.hero-text {
+  position: relative;
+  z-index: 1;
+  max-width: 40ch;
+  margin: 0 auto;
+  padding: 0 20px clamp(14px, 3vw, 26px);
   will-change: transform;
 }
-
-/* Weicher Verlauf: oben aufhellen für die Schrift, unten in die Seite überblenden */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(to right,
-      var(--bg) 0%,
-      rgba(250,245,239,.45) 5%,
-      rgba(250,245,239,0) 13%,
-      rgba(250,245,239,0) 87%,
-      rgba(250,245,239,.45) 95%,
-      var(--bg) 100%),
-    linear-gradient(to bottom,
-      rgba(250,245,239,.97) 0%,
-      rgba(250,245,239,.94) 34%,
-      rgba(250,245,239,.62) 50%,
-      rgba(250,245,239,.10) 64%,
-      rgba(250,245,239,.55) 88%,
-      var(--bg) 100%);
-}
-
-.hero-content { position: relative; max-width: 40ch; }
 
 .eyebrow {
   margin: 0;
@@ -125,7 +92,7 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   margin: .12em 0 .2em;
   font-family: "Cormorant Garamond", Iowan Old Style, Palatino, Georgia, serif;
   font-weight: 600;
-  font-size: clamp(3.2rem, 13vw, 5.4rem);
+  font-size: clamp(3.2rem, 12vw, 5.4rem);
   line-height: .95;
   letter-spacing: -.015em;
   color: var(--ink);
@@ -138,8 +105,53 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   font-size: clamp(.94rem, 2.4vw, 1.02rem);
 }
 
+/* --- Das Bild ------------------------------------------------------------
+   Grundfall: volle Breite, Höhe ergibt sich aus dem Bild -> kein Beschnitt.
+   Erst bei sehr breiten Fenstern greift die Höhenbremse; dann wird um die
+   Bildmitte herum beschnitten, also genau um die Tiere.                    */
+
+.hero-media {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;      /* begrenzt die Breite statt das Bild zu beschneiden */
+  margin-inline: auto;
+  line-height: 0;
+}
+
+.hero-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(78vh, 680px);   /* Notbremse für sehr flache Fenster */
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Weiche Kanten, damit das Foto in den Seitenhintergrund übergeht */
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      var(--bg) 0%,
+      rgba(250,245,239,.55) 7%,
+      rgba(250,245,239,0) 16%,
+      rgba(250,245,239,0) 72%,
+      rgba(250,245,239,.80) 93%,
+      var(--bg) 100%),
+    linear-gradient(to right,
+      var(--bg) 0%,
+      rgba(250,245,239,.45) 4%,
+      rgba(250,245,239,0) 11%,
+      rgba(250,245,239,0) 89%,
+      rgba(250,245,239,.45) 96%,
+      var(--bg) 100%);
+}
+
 /* Perlen, die langsam aufsteigen */
-.bubbles { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.bubbles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 
 .bubbles span {
   position: absolute;
@@ -159,7 +171,7 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   0%   { transform: translateY(0) scale(.85);      opacity: 0; }
   12%  {                                            opacity: .75; }
   85%  {                                            opacity: .35; }
-  100% { transform: translateY(-78vh) scale(1.12); opacity: 0; }
+  100% { transform: translateY(-70vh) scale(1.12); opacity: 0; }
 }
 
 /* ==========================================================================
@@ -170,7 +182,7 @@ main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin: -46px 0 22px;   /* schiebt sich sanft über den Hero-Verlauf */
+  margin: clamp(-30px, -2.4vw, -12px) 0 22px;
   position: relative;
 }
 
@@ -661,10 +673,9 @@ html.js .reveal.in {
    ========================================================================== */
 
 @media (max-width: 560px) {
-  .hero { min-height: clamp(420px, 66vh, 540px); padding-bottom: 80px; }
-  .hero-media img { object-position: 50% 94%; }
+  .hero-media img { max-height: min(52vh, 420px); }
 
-  .stats { gap: 8px; margin-top: -38px; }
+  .stats { gap: 8px; margin-top: -14px; }
   .stat { padding: 14px 6px 12px; }
   .stat-num { font-size: 1.75rem; }
   .stat-label { font-size: .71rem; }
@@ -694,6 +705,6 @@ html.js .reveal.in {
 
   .bubbles { display: none; }
   html.js .reveal { opacity: 1; transform: none; }
-  .hero-media img { transform: none !important; }
+  .hero-text { transform: none !important; opacity: 1 !important; }
   .wish:hover, .stat:hover { transform: none; }
 }
