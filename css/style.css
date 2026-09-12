@@ -708,3 +708,59 @@ html.js .reveal.in {
   .hero-text { transform: none !important; opacity: 1 !important; }
   .wish:hover, .stat:hover { transform: none; }
 }
+
+/* ==========================================================================
+   Bemerkung und Reservierung mit Passwort
+   ========================================================================== */
+
+.wish-note {
+  margin: 7px 0 0;
+  font-size: .87rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  padding-left: 11px;
+  border-left: 2px solid var(--rose-soft);
+  overflow-wrap: anywhere;
+}
+
+.wish.taken .wish-note { opacity: .7; }
+
+.wish-lock {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--border-soft);
+  animation: slide-down .3s var(--ease) both;
+}
+
+.wish.taken .wish-lock { background: #fffdfa; }
+
+.lock-hint {
+  margin: 0 0 10px;
+  font-size: .84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.lock-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+
+.lock-line input {
+  flex: 1 1 180px;
+  max-width: 260px;
+  width: auto;
+}
+
+.lock-msg {
+  margin: 8px 0 0;
+  font-size: .84rem;
+  min-height: 1.2em;
+  color: var(--ink-soft);
+}
+.lock-msg.error { color: var(--rose); font-weight: 600; }

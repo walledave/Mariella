@@ -70,6 +70,7 @@
     panel: $("admin-panel"), form: $("wish-form"), heading: $("form-heading"),
     msg: $("form-msg"), submit: $("submit-btn"), cancel: $("cancel-edit"), editId: $("edit-id"),
     fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"), fImage: $("f-image"),
+    fNote: $("f-note"),
     imgStatus: $("image-status"), imgPreview: $("image-preview"),
     imgText: $("image-status-text"), imgManual: $("image-manual"),
     imgRefresh: $("image-refresh"), imgRow: $("image-row"),
@@ -78,7 +79,6 @@
   };
 
   var wishes = [];
-  var busy = {};
   var seenWishes = {};
   var lastJson = "";
   var admin = false;
@@ -94,6 +94,21 @@
       if (value) localStorage.setItem(STORE_KEY, value);
       else localStorage.removeItem(STORE_KEY);
     } catch (e) {}
+  }
+
+  /* ---------- Gemerkte Reservierungs-Passwörter ---------- */
+
+  function lockStore() {
+    try { return JSON.parse(localStorage.getItem("wl-locks") || "{}"); }
+    catch (e) { return {}; }
+  }
+  function rememberLock(id, value) {
+    try { var m = lockStore(); m[id] = value; localStorage.setItem("wl-locks", JSON.stringify(m)); }
+    catch (e) {}
+  }
+  function forgetLock(id) {
+    try { var m = lockStore(); delete m[id]; localStorage.setItem("wl-locks", JSON.stringify(m)); }
+    catch (e) {}
   }
 
   /* ---------- Hilfsfunktionen ---------- */
@@ -387,6 +402,14 @@
       meta.appendChild(badge);
     }
     if (meta.childNodes.length) body.appendChild(meta);
+
+    if (w.note) {
+      var note = document.createElement("p");
+      note.className = "wish-note";
+      note.textContent = w.note;
+      body.appendChild(note);
+    }
+
     card.appendChild(body);
 
     var actions = document.createElement("div");
@@ -396,8 +419,6 @@
     toggle.type = "button";
     toggle.className = w.reserved ? "ghost" : "primary";
     toggle.textContent = w.reserved ? "Wunsch aufheben" : "Wunsch reservieren";
-    toggle.disabled = !!busy[w.id];
-    toggle.addEventListener("click", function () { onToggle(w); });
     actions.appendChild(toggle);
 
     if (admin) {
@@ -418,11 +439,127 @@
 
       row.appendChild(edit);
       row.appendChild(del);
+
+      if (w.reserved) {
+        var rel = document.createElement("button");
+        rel.type = "button";
+        rel.className = "icon-btn";
+        rel.textContent = "Freigeben";
+        rel.title = "Reservierung ohne fremdes Passwort aufheben";
+        rel.addEventListener("click", function () { onAdminRelease(w); });
+        row.appendChild(rel);
+      }
       actions.appendChild(row);
     }
 
     card.appendChild(actions);
+    card.appendChild(lockForm(w, toggle));
     return card;
+  }
+
+  /* ---------- Reservieren und Aufheben mit eigenem Passwort ---------- */
+
+  function closeLocks(except) {
+    var forms = document.querySelectorAll(".wish-lock");
+    for (var i = 0; i < forms.length; i++) {
+      if (forms[i] !== except) forms[i].hidden = true;
+    }
+  }
+
+  function lockForm(w, toggle) {
+    var form = document.createElement("form");
+    form.className = "wish-lock";
+    form.hidden = true;
+    form.autocomplete = "off";
+
+    var hint = document.createElement("p");
+    hint.className = "lock-hint";
+    hint.textContent = w.reserved
+      ? "Gib das Passwort ein, mit dem dieser Wunsch reserviert wurde."
+      : "Denk dir ein Passwort aus. Du brauchst es, falls du die Reservierung wieder aufheben möchtest.";
+
+    var line = document.createElement("div");
+    line.className = "lock-line";
+
+    var input = document.createElement("input");
+    input.type = "password";
+    input.autocomplete = w.reserved ? "current-password" : "new-password";
+    input.placeholder = w.reserved ? "Passwort" : "Passwort ausdenken";
+    input.maxLength = 80;
+
+    var go = document.createElement("button");
+    go.type = "submit";
+    go.className = "primary small";
+    go.textContent = w.reserved ? "Aufheben" : "Reservieren";
+
+    var cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "linkish";
+    cancel.textContent = "Abbrechen";
+    cancel.addEventListener("click", function () { form.hidden = true; });
+
+    var msg = document.createElement("p");
+    msg.className = "lock-msg";
+
+    line.appendChild(input);
+    line.appendChild(go);
+    line.appendChild(cancel);
+    form.appendChild(hint);
+    form.appendChild(line);
+    form.appendChild(msg);
+
+    function say(text, kind) {
+      msg.textContent = text || "";
+      msg.className = "lock-msg" + (kind ? " " + kind : "");
+    }
+
+    toggle.addEventListener("click", function () {
+      var wasOpen = !form.hidden;
+      closeLocks(form);
+      form.hidden = wasOpen;
+      if (!wasOpen) {
+        say("");
+        input.value = w.reserved ? (lockStore()[w.id] || "") : "";
+        input.focus();
+      }
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var value = (input.value || "").trim();
+      var reserving = !w.reserved;
+
+      if (reserving && value.length < 3) { say("Bitte mindestens 3 Zeichen.", "error"); return; }
+      if (!reserving && !value) { say("Bitte das Passwort eingeben.", "error"); return; }
+
+      go.disabled = true;
+      say(reserving ? "Reserviere …" : "Hebe auf …");
+
+      rpc(reserving ? "reserve_wish" : "release_wish", { p_id: w.id, pw: value })
+        .then(function () {
+          if (reserving) rememberLock(w.id, value); else forgetLock(w.id);
+          lastJson = "";
+          return load();
+        })
+        .catch(function (err) {
+          go.disabled = false;
+          var m = err.message || "";
+          say(/zu kurz/i.test(m)          ? "Das Passwort ist zu kurz."
+            : /Falsches Passwort/i.test(m) ? "Falsches Passwort."
+            : /Schon reserviert/i.test(m)  ? "Diesen Wunsch hat gerade jemand anderes reserviert."
+            : "Fehler: " + m, "error");
+        });
+    });
+
+    return form;
+  }
+
+  function onAdminRelease(w) {
+    if (!admin) return;
+    if (!window.confirm('Reservierung für "' + w.title + '" ohne das fremde Passwort aufheben?')) return;
+    rpc("admin_release", { pw: pw, p_id: w.id })
+      .then(function () { forgetLock(w.id); lastJson = ""; return load(); })
+      .catch(function (err) { handleAdminError(err, "Freigeben fehlgeschlagen"); });
   }
 
   function render() {
@@ -458,26 +595,6 @@
         el.empty.hidden = true;
         showNotice("<strong>Die Liste konnte nicht geladen werden.</strong><br>" +
           escapeHtml(err.message));
-      });
-  }
-
-  function onToggle(w) {
-    if (busy[w.id]) return;
-    if (w.reserved && !window.confirm("Reservierung wieder aufheben?")) return;
-
-    busy[w.id] = true;
-    var next = !w.reserved;
-    w.reserved = next;
-    lastJson = "";
-    render();
-
-    rpc("set_reserved", { p_id: w.id, p_value: next })
-      .then(function () { delete busy[w.id]; return load(); })
-      .catch(function (err) {
-        delete busy[w.id];
-        w.reserved = !next;
-        render();
-        window.alert("Das hat nicht geklappt: " + err.message);
       });
   }
 
@@ -530,6 +647,7 @@
     el.fLink.value = w.link || "";
     el.fPrice.value = w.price || "";
     el.fImage.value = w.image_url || "";
+    el.fNote.value = w.note || "";
     clearImageStatus();
     if (safeUrl(w.image_url)) {
       lastLookedUp = safeUrl(w.link) || "";
@@ -564,7 +682,8 @@
       p_title: el.fTitle.value,
       p_link: el.fLink.value,
       p_price: formatPrice(el.fPrice.value),
-      p_image_url: safeUrl(el.fImage.value) || ""
+      p_image_url: safeUrl(el.fImage.value) || "",
+      p_note: el.fNote.value
     };
 
     setMsg("Speichern …");

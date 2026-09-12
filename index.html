@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
 
@@ -94,6 +94,11 @@
         <button type="button" class="linkish" id="image-manual">Bild selbst angeben</button>
       </div>
 
+      <div class="field">
+        <label for="f-note">Bemerkung <span class="hint">(z. B. Größe 86, Farbe rosé)</span></label>
+        <input id="f-note" name="note" type="text" maxlength="200" placeholder="Größe 86">
+      </div>
+
       <div class="field" id="image-row" hidden>
         <label for="f-image">Bild-URL <span class="hint">(Rechtsklick aufs Produktbild → „Bildadresse kopieren")</span></label>
         <input id="f-image" name="image_url" type="url" maxlength="600" placeholder="https://…jpg">
@@ -131,7 +136,7 @@
   </div>
 </footer>
 
-<script src="js/config.js?v=9"></script>
-<script src="js/app.js?v=9"></script>
+<script src="js/config.js?v=10"></script>
+<script src="js/app.js?v=10"></script>
 </body>
 </html>
