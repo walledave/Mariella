@@ -19,7 +19,8 @@
     msg: $("form-msg"), submit: $("submit-btn"), cancel: $("cancel-edit"), editId: $("edit-id"),
     fTitle: $("f-title"), fLink: $("f-link"), fPrice: $("f-price"), fImage: $("f-image"),
     imgStatus: $("image-status"), imgPreview: $("image-preview"),
-    imgText: $("image-status-text"), imgManual: $("image-manual"), imgRow: $("image-row"),
+    imgText: $("image-status-text"), imgManual: $("image-manual"),
+    imgRefresh: $("image-refresh"), imgRow: $("image-row"),
     login: $("login"), loginOpen: $("login-open"), loginForm: $("login-form"),
     loginPw: $("login-pw"), loginCancel: $("login-cancel"), loginMsg: $("login-msg")
   };
@@ -138,6 +139,7 @@
       el.imgPreview.hidden = true;
     }
     el.imgManual.hidden = (state === "found");
+    el.imgRefresh.hidden = !safeUrl(el.fLink.value);
   }
 
   function clearImageStatus() {
@@ -170,6 +172,13 @@
 
   el.fLink.addEventListener("change", function () { tryLookup(); });
   el.fLink.addEventListener("blur", function () { tryLookup(); });
+
+  el.imgRefresh.addEventListener("click", function () {
+    el.fImage.value = "";
+    lastLookedUp = "";
+    el.imgRow.hidden = true;
+    tryLookup();
+  });
 
   el.imgManual.addEventListener("click", function () {
     el.imgRow.hidden = false;
@@ -449,9 +458,11 @@
     el.fPrice.value = w.price || "";
     el.fImage.value = w.image_url || "";
     clearImageStatus();
-    lastLookedUp = safeUrl(w.link) || "";
     if (safeUrl(w.image_url)) {
+      lastLookedUp = safeUrl(w.link) || "";
       setImageStatus("found", "Bild vorhanden", safeUrl(w.image_url));
+    } else {
+      lastLookedUp = "";
     }
     el.heading.textContent = "Wunsch bearbeiten";
     el.submit.textContent = "Speichern";
