@@ -242,7 +242,7 @@
     var toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = w.reserved ? "ghost" : "primary";
-    toggle.textContent = w.reserved ? "Doch nicht" : "Ich nehme das";
+    toggle.textContent = w.reserved ? "Wunsch aufheben" : "Wunsch reservieren";
     toggle.disabled = !!busy[w.id];
     toggle.addEventListener("click", function () { onToggle(w); });
     actions.appendChild(toggle);
