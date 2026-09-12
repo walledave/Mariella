@@ -113,6 +113,14 @@
 
   var lastLookedUp = "";
 
+  // Viele Shops hinterlegen ihr Firmenlogo als Vorschaubild – das ist kein Produktbild.
+  function looksLikeLogo(url) {
+    if (!url) return false;
+    var u = url.toLowerCase();
+    if (/\.(ico|svg)(\?|$)/.test(u)) return true;
+    return /(^|[\/_\-.])(logo|favicon|sprite|placeholder|no[_\-]?image|dummy|brand)([\/_\-.]|$)/.test(u);
+  }
+
   function lookupImage(pageUrl) {
     var ctrl = new AbortController();
     var timer = window.setTimeout(function () { ctrl.abort(); }, 9000);
@@ -120,8 +128,8 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         var d = (j && j.data) || {};
-        var found = (d.image && d.image.url) || (d.logo && d.logo.url) || null;
-        return safeUrl(found);
+        var found = safeUrl((d.image && d.image.url) || null);
+        return (found && !looksLikeLogo(found)) ? found : null;
       })
       .catch(function () { return "ERROR"; })
       .then(function (v) { window.clearTimeout(timer); return v; });
@@ -167,8 +175,8 @@
         setImageStatus("found", "Bild gefunden", img);
       } else {
         setImageStatus("failed", img === "ERROR"
-          ? "Bilddienst nicht erreichbar (Werbeblocker?) – du kannst ein Bild selbst eintragen."
-          : "Kein Bild gefunden – du kannst eins selbst eintragen.", null);
+          ? "Bilddienst nicht erreichbar (Werbeblocker?) – bitte Bild selbst eintragen."
+          : "Der Shop liefert kein Produktbild – im Shop Rechtsklick aufs Bild, Bildadresse kopieren und unten einfügen.", null);
         if (el.imgRow) el.imgRow.hidden = false;
       }
     }).catch(function () {});
