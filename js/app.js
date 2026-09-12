@@ -54,6 +54,13 @@
     catch (e) { return "Link"; }
   }
 
+  // "133" -> "133 €";  "133 €", "ca. 133", "" bleiben unverändert
+  function formatPrice(raw) {
+    var v = (raw || "").trim();
+    if (!v) return "";
+    return /^\d+([.,]\d{1,2})?$/.test(v) ? v + " €" : v;
+  }
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -205,10 +212,11 @@
     var meta = document.createElement("p");
     meta.className = "wish-meta";
 
-    if (w.price) {
+    var priceText = formatPrice(w.price);
+    if (priceText) {
       var price = document.createElement("span");
       price.className = "price";
-      price.textContent = w.price;
+      price.textContent = priceText;
       meta.appendChild(price);
     }
     if (link) {
@@ -381,7 +389,7 @@
       pw: pw,
       p_title: el.fTitle.value,
       p_link: el.fLink.value,
-      p_price: el.fPrice.value,
+      p_price: formatPrice(el.fPrice.value),
       p_image_url: el.fImage.value
     };
 
