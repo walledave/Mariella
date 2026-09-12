@@ -690,6 +690,32 @@ html.js .reveal.in {
    Schmale Bildschirme
    ========================================================================== */
 
+/* Auf schmalen Displays steigen die Blasen in den Rändern neben der Liste auf.
+   Dafür rückt der Inhalt ein paar Pixel ein, sonst wären sie halb verdeckt. */
+@media (max-width: 640px) {
+  main, footer { padding-inline: 30px; }
+
+  .bubbles span {
+    width:  clamp(8px, var(--s), 16px);
+    height: clamp(8px, var(--s), 16px);
+    animation-name: rise-schmal;
+  }
+  .bubbles span:nth-child(4n+1) { left: 3px; }
+  .bubbles span:nth-child(4n+2) { left: auto; right: 3px; }
+  .bubbles span:nth-child(4n+3) { left: 12px; }
+  .bubbles span:nth-child(4n)   { left: auto; right: 12px; }
+}
+
+/* Gleiche Bewegung, aber ohne seitliche Drift – sonst verschwinden sie
+   im schmalen Randstreifen hinter den Karten. */
+@keyframes rise-schmal {
+  0%   { transform: translate3d(0, 0, 0) scale(.8);       opacity: 0; }
+  10%  {                                                   opacity: .95; }
+  50%  { transform: translate3d(2px, -55vh, 0) scale(1.02); opacity: .9; }
+  88%  {                                                   opacity: .55; }
+  100% { transform: translate3d(0, -112vh, 0) scale(1.15); opacity: 0; }
+}
+
 @media (max-width: 560px) {
   .hero { min-height: clamp(300px, 42vh, 400px); padding-top: 28px; }
 
