@@ -123,11 +123,12 @@
         var found = (d.image && d.image.url) || (d.logo && d.logo.url) || null;
         return safeUrl(found);
       })
-      .catch(function () { return null; })
+      .catch(function () { return "ERROR"; })
       .then(function (v) { window.clearTimeout(timer); return v; });
   }
 
   function setImageStatus(state, text, imageUrl) {
+    if (!el.imgStatus) return;
     el.imgStatus.hidden = false;
     el.imgStatus.className = "imgstatus" + (state ? " " + state : "");
     el.imgText.textContent = text;
@@ -138,16 +139,17 @@
       el.imgPreview.removeAttribute("src");
       el.imgPreview.hidden = true;
     }
-    el.imgManual.hidden = (state === "found");
-    el.imgRefresh.hidden = !safeUrl(el.fLink.value);
+    if (el.imgManual) el.imgManual.hidden = (state === "found");
+    if (el.imgRefresh) el.imgRefresh.hidden = !safeUrl(el.fLink.value);
   }
 
   function clearImageStatus() {
+    if (!el.imgStatus) { lastLookedUp = ""; return; }
     el.imgStatus.hidden = true;
     el.imgStatus.className = "imgstatus";
     el.imgPreview.removeAttribute("src");
     el.imgPreview.hidden = true;
-    el.imgRow.hidden = true;
+    if (el.imgRow) el.imgRow.hidden = true;
     lastLookedUp = "";
   }
 
@@ -160,27 +162,29 @@
     setImageStatus("", "Suche das Produktbild …", null);
     return lookupImage(link).then(function (img) {
       if (safeUrl(el.fLink.value) !== link) return;   // Link wurde inzwischen geändert
-      if (img) {
+      if (img && img !== "ERROR") {
         el.fImage.value = img;
         setImageStatus("found", "Bild gefunden", img);
       } else {
-        setImageStatus("failed", "Kein Bild gefunden – du kannst eins selbst eintragen.", null);
-        el.imgRow.hidden = false;
+        setImageStatus("failed", img === "ERROR"
+          ? "Bilddienst nicht erreichbar (Werbeblocker?) – du kannst ein Bild selbst eintragen."
+          : "Kein Bild gefunden – du kannst eins selbst eintragen.", null);
+        if (el.imgRow) el.imgRow.hidden = false;
       }
-    });
+    }).catch(function () {});
   }
 
   el.fLink.addEventListener("change", function () { tryLookup(); });
   el.fLink.addEventListener("blur", function () { tryLookup(); });
 
-  el.imgRefresh.addEventListener("click", function () {
+  if (el.imgRefresh) el.imgRefresh.addEventListener("click", function () {
     el.fImage.value = "";
     lastLookedUp = "";
     el.imgRow.hidden = true;
     tryLookup();
   });
 
-  el.imgManual.addEventListener("click", function () {
+  if (el.imgManual) el.imgManual.addEventListener("click", function () {
     el.imgRow.hidden = false;
     el.fImage.focus();
   });
@@ -481,7 +485,7 @@
       ? (setMsg("Suche das Produktbild …"), tryLookup())
       : Promise.resolve();
 
-    pending.then(doSave);
+    pending.catch(function () {}).then(doSave);
   });
 
   function doSave() {
@@ -491,7 +495,7 @@
       p_title: el.fTitle.value,
       p_link: el.fLink.value,
       p_price: formatPrice(el.fPrice.value),
-      p_image_url: el.fImage.value
+      p_image_url: safeUrl(el.fImage.value) || ""
     };
 
     setMsg("Speichern …");
