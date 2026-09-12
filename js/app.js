@@ -132,6 +132,44 @@
     return /^\d+([.,]\d{1,2})?$/.test(v) ? v + " €" : v;
   }
 
+  // Preis steht als freier Text da ("133 €", "34,95 €", "ca. 1.299,00").
+  // Für die Sortierung die Zahl herauslösen; ohne Zahl -> null.
+  function priceValue(raw) {
+    if (!raw) return null;
+    var m = String(raw).match(/\d[\d.,]*/);
+    if (!m) return null;
+    var t = m[0];
+    var hatPunkt = t.indexOf(".") >= 0, hatKomma = t.indexOf(",") >= 0;
+
+    if (hatPunkt && hatKomma) {
+      // letztes Trennzeichen ist das Dezimaltrennzeichen
+      t = (t.lastIndexOf(",") > t.lastIndexOf("."))
+        ? t.replace(/\./g, "").replace(",", ".")
+        : t.replace(/,/g, "");
+    } else if (hatKomma) {
+      t = /,\d{1,2}$/.test(t) ? t.replace(",", ".") : t.replace(/,/g, "");
+    } else if (hatPunkt) {
+      t = /\.\d{1,2}$/.test(t) ? t : t.replace(/\./g, "");
+    }
+
+    var v = parseFloat(t);
+    return isFinite(v) ? v : null;
+  }
+
+  // Offene zuerst, innerhalb jeder Gruppe teuerster Wunsch oben.
+  // Wünsche ohne Preisangabe stehen am Ende ihrer Gruppe.
+  function sortWishes(list) {
+    return list.slice().sort(function (a, b) {
+      if (a.reserved !== b.reserved) return a.reserved ? 1 : -1;
+      var pa = priceValue(a.price), pb = priceValue(b.price);
+      if (pa === null && pb === null) return (b.created_at || "").localeCompare(a.created_at || "");
+      if (pa === null) return 1;
+      if (pb === null) return -1;
+      if (pb !== pa) return pb - pa;
+      return (b.created_at || "").localeCompare(a.created_at || "");
+    });
+  }
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -564,7 +602,7 @@
 
   function render() {
     var hide = el.hideTaken.checked;
-    var visible = hide ? wishes.filter(function (w) { return !w.reserved; }) : wishes;
+    var visible = sortWishes(hide ? wishes.filter(function (w) { return !w.reserved; }) : wishes);
 
     el.list.textContent = "";
     visible.forEach(function (w) { el.list.appendChild(wishNode(w)); });
