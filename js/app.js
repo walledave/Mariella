@@ -2,6 +2,53 @@
 (function () {
   "use strict";
 
+  /* ---------- Bewegung: Einblenden, Parallaxe ----------------------------
+     Rein visuell. Fällt alles weg, bleibt die Seite voll bedienbar.       */
+
+  document.documentElement.classList.add("js");
+
+  var reduceMotion = window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var revealObserver = (!reduceMotion && "IntersectionObserver" in window)
+    ? new window.IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("in"); obs.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -6% 0px", threshold: 0.06 })
+    : null;
+
+  function reveal(node) {
+    if (!node) return;
+    if (revealObserver) revealObserver.observe(node);
+    else node.classList.add("in");
+  }
+
+  function revealScan() {
+    var nodes = document.querySelectorAll(".reveal:not(.in)");
+    for (var i = 0; i < nodes.length; i++) reveal(nodes[i]);
+  }
+
+  // Sicherheitsnetz: nach 2 s ist alles sichtbar, egal was der Observer macht
+  window.setTimeout(function () {
+    var nodes = document.querySelectorAll(".reveal:not(.in)");
+    for (var i = 0; i < nodes.length; i++) nodes[i].classList.add("in");
+  }, 2000);
+
+  var heroImg = document.getElementById("hero-img");
+  if (heroImg && !reduceMotion) {
+    var ticking = false;
+    window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        var y = window.scrollY || window.pageYOffset || 0;
+        if (y < 1000) heroImg.style.transform = "translate3d(0," + (y * 0.15).toFixed(1) + "px,0)";
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
   var CFG = window.WUNSCHLISTE_CONFIG || {};
   var URL_BASE = (CFG.SUPABASE_URL || "").replace(/\/+$/, "");
   var KEY = CFG.SUPABASE_ANON_KEY || "";
@@ -27,6 +74,8 @@
 
   var wishes = [];
   var busy = {};
+  var seenWishes = {};
+  var lastJson = "";
   var admin = false;
   var pw = "";
 
@@ -281,7 +330,10 @@
     var img = safeUrl(w.image_url);
 
     var card = document.createElement("article");
-    card.className = "wish" + (w.reserved ? " taken" : "") + (img ? "" : " no-image");
+    var fresh = !seenWishes[w.id];
+    seenWishes[w.id] = true;
+    card.className = "wish" + (w.reserved ? " taken" : "") + (img ? "" : " no-image")
+                   + (fresh ? " reveal" : "");
 
     if (img) {
       var thumb = document.createElement("img");
@@ -374,6 +426,7 @@
 
     el.list.textContent = "";
     visible.forEach(function (w) { el.list.appendChild(wishNode(w)); });
+    revealScan();
 
     el.empty.hidden = visible.length > 0;
     el.empty.textContent = wishes.length === 0
@@ -388,10 +441,12 @@
   function load() {
     return api("wishes?select=*&order=reserved.asc,created_at.desc")
       .then(function (rows) {
+        var json = JSON.stringify(rows);
         wishes = rows || [];
         el.toolbar.hidden = false;
         el.notice.hidden = true;
-        render();
+        if (json !== lastJson) { lastJson = json; render(); }
+        revealScan();
       })
       .catch(function (err) {
         el.list.textContent = "";
@@ -408,6 +463,7 @@
     busy[w.id] = true;
     var next = !w.reserved;
     w.reserved = next;
+    lastJson = "";
     render();
 
     rpc("set_reserved", { p_id: w.id, p_value: next })

@@ -1,312 +1,575 @@
-/* Mariellas Wunschliste */
+/* ==========================================================================
+   Mariellas Wunschliste
+   Visuelle Grundlage: das Aquarell-Wandbild im Kinderzimmer –
+   warmes Cremeweiß, Sandgreige, Altrosa, Salbeigrün, viel Luft.
+   ========================================================================== */
 
 :root {
-  --bg:        #fdf7f4;
-  --bg-alt:    #f6ece7;
-  --card:      #ffffff;
-  --fg:        #2b1f25;
-  --muted:     #7d6b73;
-  --accent:    #a4365c;
-  --accent-sf: #f7e4ea;
-  --border:    #ecdcd4;
-  --ok:        #2f7a5a;
-  --shadow:    0 1px 2px rgba(43,31,37,.05), 0 8px 24px -12px rgba(43,31,37,.18);
-  --radius:    14px;
-}
+  /* Flächen */
+  --bg:        #faf5ef;   /* Wandton, warmes Creme */
+  --bg-deep:   #f3ebe0;   /* Sandgreige für ruhige Flächen */
+  --card:      #fffdfa;
+  --border:    #e9dccd;
+  --border-soft: #f0e6da;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:        #191317;
-    --bg-alt:    #221a1f;
-    --card:      #241c21;
-    --fg:        #f2e9ed;
-    --muted:     #a89099;
-    --accent:    #f08aac;
-    --accent-sf: #3a222c;
-    --border:    #3a2d34;
-    --ok:        #6cc39a;
-    --shadow:    0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
-  }
+  /* Schrift */
+  --ink:       #463c34;   /* warmes Dunkelbraun statt Schwarz */
+  --ink-soft:  #665c53;
+  --ink-faint: #6f655c;
+
+  /* Akzente aus dem Bild */
+  --rose:      #9b5265;   /* Koralle / Seestern, dunkel genug für Text */
+  --rose-mid:  #c98a99;
+  --rose-soft: #f7e8ea;
+  --sage:      #5f6a48;   /* Seegras */
+  --sage-soft: #edf0e4;
+  --pearl:     #efe6db;
+
+  --radius:    18px;
+  --radius-sm: 11px;
+  --shadow-sm: 0 1px 2px rgba(70,60,52,.05);
+  --shadow:    0 2px 4px rgba(70,60,52,.04), 0 14px 34px -20px rgba(70,60,52,.30);
+  --shadow-lg: 0 3px 6px rgba(70,60,52,.05), 0 26px 52px -26px rgba(70,60,52,.38);
+
+  --ease:      cubic-bezier(.22,.61,.36,1);
 }
 
 * { box-sizing: border-box; }
 
 [hidden] { display: none !important; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
-  padding: 0 18px 64px;
+  padding: 0 0 72px;
   background: var(--bg);
-  color: var(--fg);
-  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
 }
 
-.hero, main, footer { max-width: 720px; margin-inline: auto; }
+main, footer { max-width: 760px; margin-inline: auto; padding-inline: 20px; }
 
-/* ---------- Hero ---------- */
+::selection { background: var(--rose-soft); color: var(--ink); }
 
-.hero { padding-block: 64px 32px; text-align: center; }
+/* ==========================================================================
+   Hero – das Wandbild als Bühne
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(470px, 74vh, 700px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: clamp(44px, 9vw, 84px) 20px clamp(90px, 16vw, 150px);
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-media {
+  position: absolute;
+  inset: -8% 0 0;
+  z-index: -2;
+}
+
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 96%;
+  will-change: transform;
+}
+
+/* Weicher Verlauf: oben aufhellen für die Schrift, unten in die Seite überblenden */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to right,
+      var(--bg) 0%,
+      rgba(250,245,239,.45) 5%,
+      rgba(250,245,239,0) 13%,
+      rgba(250,245,239,0) 87%,
+      rgba(250,245,239,.45) 95%,
+      var(--bg) 100%),
+    linear-gradient(to bottom,
+      rgba(250,245,239,.97) 0%,
+      rgba(250,245,239,.94) 34%,
+      rgba(250,245,239,.62) 50%,
+      rgba(250,245,239,.10) 64%,
+      rgba(250,245,239,.55) 88%,
+      var(--bg) 100%);
+}
+
+.hero-content { position: relative; max-width: 40ch; }
 
 .eyebrow {
   margin: 0;
-  font-size: .78rem;
-  letter-spacing: .18em;
+  font-size: .72rem;
+  letter-spacing: .3em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--rose);
   font-weight: 600;
 }
 
 .hero h1 {
-  margin: 6px 0 14px;
-  font-size: clamp(2.4rem, 9vw, 3.4rem);
-  font-weight: 700;
-  letter-spacing: -.03em;
-  line-height: 1.05;
+  margin: .12em 0 .2em;
+  font-family: "Cormorant Garamond", Iowan Old Style, Palatino, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(3.2rem, 13vw, 5.4rem);
+  line-height: .95;
+  letter-spacing: -.015em;
+  color: var(--ink);
 }
 
 .lede {
   margin: 0 auto;
-  max-width: 44ch;
-  color: var(--muted);
-  font-size: .98rem;
+  max-width: 38ch;
+  color: var(--ink-soft);
+  font-size: clamp(.94rem, 2.4vw, 1.02rem);
 }
 
-/* ---------- Stats ---------- */
+/* Perlen, die langsam aufsteigen */
+.bubbles { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+
+.bubbles span {
+  position: absolute;
+  left: var(--x);
+  bottom: -40px;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgba(201,138,153,.28);
+  animation: rise 22s linear infinite;
+  animation-delay: var(--d);
+  opacity: 0;
+}
+
+@keyframes rise {
+  0%   { transform: translateY(0) scale(.85);      opacity: 0; }
+  12%  {                                            opacity: .75; }
+  85%  {                                            opacity: .35; }
+  100% { transform: translateY(-78vh) scale(1.12); opacity: 0; }
+}
+
+/* ==========================================================================
+   Kennzahlen
+   ========================================================================== */
 
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin: -46px 0 22px;   /* schiebt sich sanft über den Hero-Verlauf */
+  position: relative;
 }
 
 .stat {
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
+  background: var(--card);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius);
-  padding: 14px 8px;
+  box-shadow: var(--shadow);
+  padding: 18px 10px 15px;
   text-align: center;
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
 }
+
+.stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
 .stat-num {
   display: block;
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1.1;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 2.15rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--rose);
   font-variant-numeric: tabular-nums;
 }
 
-.stat-label { display: block; font-size: .78rem; color: var(--muted); }
+.stat-label {
+  display: block;
+  margin-top: 4px;
+  font-size: .76rem;
+  letter-spacing: .06em;
+  color: var(--ink-faint);
+}
 
-/* ---------- Toolbar ---------- */
+/* ==========================================================================
+   Werkzeugleiste
+   ========================================================================== */
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 18px;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-inline: 4px;
 }
 
 .switch {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: .9rem;
-  color: var(--muted);
+  gap: 9px;
+  font-size: .89rem;
+  color: var(--ink-soft);
   cursor: pointer;
   user-select: none;
+  transition: color .25s var(--ease);
 }
 
-.switch input { accent-color: var(--accent); width: 16px; height: 16px; }
+.switch:hover { color: var(--rose); }
 
-/* ---------- Buttons ---------- */
+.switch input {
+  accent-color: var(--rose);
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Schaltflächen
+   ========================================================================== */
 
 button {
   font: inherit;
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background .15s, border-color .15s, color .15s;
+  transition: transform .28s var(--ease), background-color .25s var(--ease),
+              border-color .25s var(--ease), color .25s var(--ease),
+              box-shadow .28s var(--ease);
 }
 
 button.primary {
   border: none;
-  background: var(--accent);
+  background: var(--rose);
   color: #fff;
   font-weight: 600;
-  padding: 11px 22px;
+  letter-spacing: .01em;
+  padding: 12px 26px;
+  box-shadow: 0 8px 18px -10px rgba(155,82,101,.75);
 }
-button.primary:hover { filter: brightness(1.08); }
-button.primary:disabled { opacity: .55; cursor: default; filter: none; }
+button.primary:hover { background: #864456; transform: translateY(-1px); box-shadow: 0 12px 24px -10px rgba(155,82,101,.8); }
+button.primary:active { transform: translateY(0); }
+button.primary:disabled { opacity: .5; cursor: default; transform: none; box-shadow: none; }
 
 button.ghost {
   border: 1px solid var(--border);
   background: var(--card);
-  color: var(--fg);
-  padding: 9px 16px;
+  color: var(--ink);
+  padding: 11px 22px;
   font-weight: 500;
 }
-button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+button.ghost:hover { border-color: var(--rose-mid); color: var(--rose); transform: translateY(-1px); }
 
-/* ---------- Panel / Formular ---------- */
+button.small { padding: 8px 17px; font-size: .89rem; }
+
+button.linkish {
+  border: none;
+  background: none;
+  color: var(--ink-faint);
+  font-size: .82rem;
+  letter-spacing: .04em;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  padding: 5px 7px;
+}
+button.linkish:hover { color: var(--rose); }
+
+:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   Admin-Leiste und Formular
+   ========================================================================== */
+
+.adminbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 11px;
+  background: linear-gradient(135deg, var(--rose-soft), #fdf4f1);
+  border: 1px solid #f0dade;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  animation: slide-down .5s var(--ease) both;
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.adminbar-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-right: auto;
+}
 
 .panel {
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 22px;
-  margin-bottom: 24px;
+  padding: 26px;
+  margin-bottom: 26px;
+  animation: slide-down .45s var(--ease) both;
 }
 
-.panel h2 { margin: 0 0 16px; font-size: 1.05rem; letter-spacing: -.01em; }
+.panel h2 {
+  margin: 0 0 20px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
 
-.field { margin-bottom: 14px; display: flex; flex-direction: column; }
+.field { margin-bottom: 16px; display: flex; flex-direction: column; }
 .field.grow { flex: 1 1 260px; }
 
-.row { display: flex; flex-wrap: wrap; gap: 14px; }
-.row .field { margin-bottom: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.row .field { margin-bottom: 16px; }
 
 label {
-  font-size: .82rem;
+  font-size: .8rem;
   font-weight: 600;
-  margin-bottom: 5px;
-  color: var(--muted);
+  letter-spacing: .03em;
+  margin-bottom: 6px;
+  color: var(--ink-soft);
 }
 
-.req { color: var(--accent); }
-.hint { font-weight: 400; opacity: .8; }
+.req { color: var(--rose); }
+.hint { font-weight: 400; color: var(--ink-faint); letter-spacing: 0; }
 
 input[type=text], input[type=url], input[type=password] {
   font: inherit;
-  padding: 10px 12px;
+  padding: 11px 14px;
   border: 1px solid var(--border);
-  border-radius: 9px;
-  background: var(--bg);
-  color: var(--fg);
+  border-radius: var(--radius-sm);
+  background: #fffefc;
+  color: var(--ink);
   width: 100%;
   min-width: 0;
+  transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
 }
 
-input:focus-visible,
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+input::placeholder { color: #9d9086; }
+
+input[type=text]:focus, input[type=url]:focus, input[type=password]:focus {
+  outline: none;
+  border-color: var(--rose-mid);
+  box-shadow: 0 0 0 3px var(--rose-soft);
 }
 
-.form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
 
-.form-msg { font-size: .88rem; color: var(--muted); }
-.form-msg.error { color: var(--accent); font-weight: 500; }
-.form-msg.ok { color: var(--ok); font-weight: 500; }
+.form-msg { font-size: .87rem; color: var(--ink-soft); }
+.form-msg.error { color: var(--rose); font-weight: 600; }
+.form-msg.ok { color: var(--sage); font-weight: 600; }
 
-/* ---------- Notice ---------- */
+/* Bildstatus im Formular */
+
+.imgstatus {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  font-size: .85rem;
+  color: var(--ink-soft);
+}
+
+.imgstatus img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 9px;
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+}
+
+.imgstatus.found  { background: var(--sage-soft); }
+.imgstatus.found  #image-status-text { color: var(--sage); font-weight: 600; }
+.imgstatus.failed { background: var(--rose-soft); }
+.imgstatus.failed #image-status-text { color: var(--rose); }
+
+/* ==========================================================================
+   Hinweiskasten
+   ========================================================================== */
 
 .notice {
-  background: var(--accent-sf);
-  border: 1px solid var(--border);
+  background: var(--rose-soft);
+  border: 1px solid #f0dade;
   border-radius: var(--radius);
-  padding: 16px 18px;
-  margin-bottom: 22px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
   font-size: .92rem;
+  line-height: 1.6;
 }
+
 .notice code {
   background: var(--card);
-  padding: 1px 5px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 5px;
   font-size: .88em;
 }
 
-/* ---------- Liste ---------- */
+/* ==========================================================================
+   Wunschkarten
+   ========================================================================== */
 
-.list { display: flex; flex-direction: column; gap: 12px; }
+.list { display: flex; flex-direction: column; gap: 14px; }
 
 .wish {
   display: grid;
-  grid-template-columns: 84px 1fr auto;
-  gap: 16px;
+  grid-template-columns: 92px 1fr auto;
+  gap: 18px;
   align-items: center;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 14px 16px;
+  padding: 16px 18px;
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease),
+              border-color .4s var(--ease);
+}
+
+.wish:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border);
 }
 
 .wish.no-image { grid-template-columns: 1fr auto; }
 
-.wish.taken { background: var(--bg-alt); box-shadow: none; }
+.wish.taken {
+  background: var(--bg-deep);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border);
+}
+.wish.taken:hover { transform: none; box-shadow: var(--shadow-sm); }
 .wish.taken .wish-title { text-decoration: line-through; text-decoration-thickness: 1px; }
-.wish.taken .thumb, .wish.taken .wish-body { opacity: .55; }
+.wish.taken .thumb, .wish.taken .wish-body { opacity: .6; }
 
 .thumb {
-  width: 84px;
-  height: 84px;
+  width: 92px;
+  height: 92px;
   object-fit: contain;
-  border-radius: 9px;
-  background: var(--bg-alt);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  border: 1px solid var(--border-soft);
+  padding: 5px;
+  transition: transform .45s var(--ease);
 }
+
+.wish:hover .thumb { transform: scale(1.04); }
 
 .wish-body { min-width: 0; }
 
 .wish-title {
   margin: 0;
-  font-size: 1.02rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.4rem;
   font-weight: 600;
-  letter-spacing: -.01em;
+  line-height: 1.2;
+  letter-spacing: -.005em;
   overflow-wrap: anywhere;
 }
 
 .wish-meta {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   font-size: .87rem;
-  color: var(--muted);
+  color: var(--ink-faint);
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
+  gap: 5px 14px;
   align-items: center;
 }
 
-.price { font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
-
-.wish-meta a { color: var(--accent); text-decoration: none; }
-.wish-meta a:hover { text-decoration: underline; }
-
-.badge {
-  display: inline-block;
-  font-size: .74rem;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--ok);
+.price {
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
 }
 
-.wish-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+.wish-meta a {
+  color: var(--rose);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .25s var(--ease);
+}
+.wish-meta a:hover { border-bottom-color: var(--rose-mid); }
 
-.wish-actions .admin-row { display: flex; gap: 6px; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+
+.badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  opacity: .7;
+}
+
+.wish-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.wish-actions .admin-row { display: flex; gap: 7px; }
 
 .icon-btn {
   border: 1px solid var(--border);
   background: transparent;
-  color: var(--muted);
-  padding: 4px 8px;
-  font-size: .78rem;
-  border-radius: 8px;
+  color: var(--ink-faint);
+  padding: 5px 11px;
+  font-size: .77rem;
+  border-radius: 999px;
 }
-.icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+.icon-btn:hover { color: var(--rose); border-color: var(--rose-mid); }
 
-.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+.empty {
+  text-align: center;
+  color: var(--ink-faint);
+  padding: 52px 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-style: italic;
+}
 
 .skeleton {
-  height: 112px;
+  height: 126px;
   border-radius: var(--radius);
-  background: linear-gradient(90deg, var(--bg-alt) 25%, var(--border) 50%, var(--bg-alt) 75%);
+  background: linear-gradient(90deg, var(--bg-deep) 25%, #f8f2ea 50%, var(--bg-deep) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  animation: shimmer 1.6s infinite;
 }
 
 @keyframes shimmer {
@@ -314,88 +577,61 @@ a:focus-visible {
   to   { background-position: -200% 0; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .skeleton { animation: none; }
+/* ==========================================================================
+   Fußbereich
+   ========================================================================== */
+
+footer { padding-top: 56px; text-align: center; color: var(--ink-faint); }
+
+.shell-divider {
+  display: block;
+  width: 108px;
+  height: 1px;
+  margin: 0 auto 22px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+  position: relative;
 }
 
-/* ---------- Footer ---------- */
-
-footer { padding-top: 44px; text-align: center; color: var(--muted); }
-footer a { color: inherit; }
-
-/* ---------- Schmale Screens ---------- */
-
-@media (max-width: 520px) {
-  .wish { grid-template-columns: 64px 1fr; }
-  .wish.no-image { grid-template-columns: 1fr; }
-  .thumb { width: 64px; height: 64px; }
-  .wish-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
-  .toolbar { justify-content: flex-start; }
+.shell-divider::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px; height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--rose-soft);
+  border: 1px solid var(--rose-mid);
 }
 
-/* ---------- Admin-Leiste ---------- */
-
-.adminbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  background: var(--accent-sf);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  margin-bottom: 18px;
-}
-
-.adminbar-label {
-  font-size: .76rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-right: auto;
-}
-
-button.small { padding: 7px 14px; font-size: .9rem; }
-
-/* ---------- Login im Footer ---------- */
+footer small { font-size: .82rem; letter-spacing: .03em; }
 
 .login { margin-top: 18px; }
-
-button.linkish {
-  border: none;
-  background: none;
-  color: var(--muted);
-  font-size: .82rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  padding: 4px 6px;
-}
-button.linkish:hover { color: var(--accent); }
 
 #login-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 9px;
   align-items: center;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 8px;
+  animation: slide-down .35s var(--ease) both;
 }
 
 #login-form input {
   width: auto;
-  min-width: 180px;
-  max-width: 240px;
+  min-width: 190px;
+  max-width: 250px;
   text-align: center;
 }
 
 .login-msg {
   flex-basis: 100%;
-  margin: 2px 0 0;
+  margin: 4px 0 0;
   font-size: .84rem;
   min-height: 1.3em;
 }
-.login-msg.error { color: var(--accent); font-weight: 500; }
+.login-msg.error { color: var(--rose); font-weight: 600; }
 
 .sr-only {
   position: absolute;
@@ -406,26 +642,57 @@ button.linkish:hover { color: var(--accent); }
   white-space: nowrap;
 }
 
-/* ---------- Bild-Status im Formular ---------- */
+/* ==========================================================================
+   Einblenden beim Scrollen
+   ========================================================================== */
 
-.imgstatus {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-  font-size: .86rem;
-  color: var(--muted);
+/* Nur wenn JavaScript läuft – sonst bleibt alles sofort sichtbar */
+html.js .reveal { opacity: 0; transform: translateY(18px); }
+
+html.js .reveal.in {
+  opacity: 1;
+  transform: none;
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
 }
 
-.imgstatus img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-  border-radius: 7px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
+/* ==========================================================================
+   Schmale Bildschirme
+   ========================================================================== */
+
+@media (max-width: 560px) {
+  .hero { min-height: clamp(420px, 66vh, 540px); padding-bottom: 80px; }
+  .hero-media img { object-position: 50% 94%; }
+
+  .stats { gap: 8px; margin-top: -38px; }
+  .stat { padding: 14px 6px 12px; }
+  .stat-num { font-size: 1.75rem; }
+  .stat-label { font-size: .71rem; }
+
+  .wish { grid-template-columns: 68px 1fr; gap: 14px; padding: 14px; }
+  .wish.no-image { grid-template-columns: 1fr; }
+  .thumb { width: 68px; height: 68px; }
+  .wish-title { font-size: 1.2rem; }
+  .wish-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+  .wish-actions button.primary, .wish-actions button.ghost { flex: 1 1 auto; }
+
+  .panel { padding: 20px 18px; }
 }
 
-.imgstatus.found #image-status-text { color: var(--ok); font-weight: 500; }
-.imgstatus.failed #image-status-text { color: var(--accent); }
+/* ==========================================================================
+   Reduzierte Bewegung respektieren
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+
+  .bubbles { display: none; }
+  html.js .reveal { opacity: 1; transform: none; }
+  .hero-media img { transform: none !important; }
+  .wish:hover, .stat:hover { transform: none; }
+}

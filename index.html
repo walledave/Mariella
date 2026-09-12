@@ -5,28 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mariellas Wunschliste</title>
 <meta name="description" content="Mariellas Wunschliste – wer etwas schenkt, hakt es hier ab, damit niemand doppelt kauft.">
-<meta name="theme-color" content="#a4365c">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
-<link rel="stylesheet" href="css/style.css?v=5">
+<meta name="theme-color" content="#f7f1e9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐚</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
 <header class="hero">
-  <p class="eyebrow">Wunschliste</p>
-  <h1>Mariella</h1>
-  <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
-    Mariella selbst sieht nicht, wer was reserviert hat.</p>
+  <div class="hero-media" aria-hidden="true">
+    <picture>
+      <source type="image/webp"
+              srcset="assets/wandbild-small.webp 800w, assets/wandbild.webp 1600w"
+              sizes="100vw">
+      <img id="hero-img" src="assets/wandbild.jpg"
+           srcset="assets/wandbild-small.jpg 800w, assets/wandbild.jpg 1600w"
+           sizes="100vw" alt="" fetchpriority="high" decoding="async">
+    </picture>
+  </div>
+
+  <div class="bubbles" aria-hidden="true">
+    <span style="--x:12%; --s:14px; --d:0s"></span>
+    <span style="--x:26%; --s:8px;  --d:-4s"></span>
+    <span style="--x:63%; --s:11px; --d:-7s"></span>
+    <span style="--x:78%; --s:7px;  --d:-2s"></span>
+    <span style="--x:88%; --s:13px; --d:-9s"></span>
+  </div>
+
+  <div class="hero-content">
+    <p class="eyebrow">Wunschliste</p>
+    <h1>Mariella</h1>
+    <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
+      Mariella selbst sieht nicht, wer was reserviert hat.</p>
+  </div>
 </header>
 
 <main>
 
-  <section class="stats" id="stats" hidden>
+  <section class="stats reveal" id="stats" hidden>
     <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Wünsche</span></div>
     <div class="stat"><span class="stat-num" id="stat-open">0</span><span class="stat-label">noch offen</span></div>
     <div class="stat"><span class="stat-num" id="stat-taken">0</span><span class="stat-label">vergeben</span></div>
   </section>
 
-  <div class="toolbar" id="toolbar" hidden>
+  <div class="toolbar reveal" id="toolbar" hidden>
     <label class="switch">
       <input type="checkbox" id="hide-taken">
       <span>Vergebene ausblenden</span>
@@ -57,6 +81,7 @@
           <input id="f-link" name="link" type="url" maxlength="600" placeholder="https://…">
         </div>
       </div>
+
       <div class="imgstatus" id="image-status" hidden>
         <img id="image-preview" alt="" hidden>
         <span id="image-status-text"></span>
@@ -68,6 +93,7 @@
         <label for="f-image">Bild-URL <span class="hint">(Rechtsklick aufs Produktbild → „Bildadresse kopieren")</span></label>
         <input id="f-image" name="image_url" type="url" maxlength="600" placeholder="https://…jpg">
       </div>
+
       <div class="form-actions">
         <button type="submit" class="primary" id="submit-btn">Hinzufügen</button>
         <button type="button" class="ghost" id="cancel-edit" hidden>Abbrechen</button>
@@ -85,6 +111,7 @@
 </main>
 
 <footer>
+  <span class="shell-divider" aria-hidden="true"></span>
   <small>Reservierungen sind anonym</small>
 
   <div class="login" id="login">
@@ -99,7 +126,7 @@
   </div>
 </footer>
 
-<script src="js/config.js?v=5"></script>
-<script src="js/app.js?v=5"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
 </body>
 </html>
