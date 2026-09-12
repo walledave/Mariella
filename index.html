@@ -1,30 +1,86 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mariella</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mariellas Wunschliste</title>
+<meta name="description" content="Mariellas Wunschliste – wer etwas schenkt, hakt es hier ab, damit niemand doppelt kauft.">
+<meta name="theme-color" content="#a4365c">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="site-header">
-    <h1>Mariella</h1>
-    <p class="tagline">Ein neues Web-Projekt.</p>
-  </header>
 
-  <main>
-    <section class="card">
-      <h2>Los geht's</h2>
-      <p>Bearbeite <code>index.html</code>, <code>css/style.css</code> und <code>js/main.js</code>.</p>
-      <button id="demo-btn" type="button">Klick mich</button>
-      <p id="demo-out" class="out" aria-live="polite"></p>
-    </section>
-  </main>
+<header class="hero">
+  <p class="eyebrow">Wunschliste</p>
+  <h1>Mariella</h1>
+  <p class="lede">Wer etwas schenkt, hakt es hier ab – so kauft niemand doppelt.
+    Mariella selbst sieht nicht, wer was reserviert hat.</p>
+</header>
 
-  <footer class="site-footer">
-    <small>&copy; <span id="year"></span> Mariella</small>
-  </footer>
+<main>
 
-  <script src="js/main.js"></script>
+  <section class="stats" id="stats" hidden>
+    <div class="stat"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Wünsche</span></div>
+    <div class="stat"><span class="stat-num" id="stat-open">0</span><span class="stat-label">noch offen</span></div>
+    <div class="stat"><span class="stat-num" id="stat-taken">0</span><span class="stat-label">vergeben</span></div>
+  </section>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <label class="switch">
+      <input type="checkbox" id="hide-taken">
+      <span>Vergebene ausblenden</span>
+    </label>
+    <button class="ghost" id="admin-toggle" type="button">Wunsch hinzufügen</button>
+  </div>
+
+  <section class="panel" id="admin-panel" hidden>
+    <h2 id="form-heading">Neuer Wunsch</h2>
+    <form id="wish-form" autocomplete="off">
+      <input type="hidden" id="edit-id">
+      <div class="field">
+        <label for="f-title">Artikel <span class="req">*</span></label>
+        <input id="f-title" name="title" type="text" required maxlength="140" placeholder="z. B. Kaschmirschal, beige">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="f-price">Preis (ca.)</label>
+          <input id="f-price" name="price" type="text" maxlength="40" placeholder="49 €">
+        </div>
+        <div class="field grow">
+          <label for="f-link">Link zum Shop</label>
+          <input id="f-link" name="link" type="url" maxlength="600" placeholder="https://…">
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-image">Bild-URL <span class="hint">(Rechtsklick aufs Produktbild → „Bildadresse kopieren")</span></label>
+        <input id="f-image" name="image_url" type="url" maxlength="600" placeholder="https://…jpg">
+      </div>
+      <div class="field">
+        <label for="f-pw">Passwort <span class="req">*</span></label>
+        <input id="f-pw" name="pw" type="password" required placeholder="••••••••">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="primary" id="submit-btn">Hinzufügen</button>
+        <button type="button" class="ghost" id="cancel-edit" hidden>Abbrechen</button>
+        <span class="form-msg" id="form-msg" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+
+  <section id="list" class="list" aria-label="Wunschliste"></section>
+
+  <p class="empty" id="empty" hidden>Noch keine Wünsche eingetragen.</p>
+
+</main>
+
+<footer>
+  <small>Reservierungen sind anonym · <a href="https://github.com/walledave/Mariella">Quellcode</a></small>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
