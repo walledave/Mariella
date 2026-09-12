@@ -37,6 +37,15 @@
 
   /* Parallaxe auf dem Titelblock, nicht auf dem Bild: das Wandbild soll in
      jeder Fensterbreite unbeschnitten und unverschoben stehen bleiben.     */
+  /* Am Seitenende steht das ganze Wandbild noch einmal – dann blendet der
+     feste Hintergrund aus, damit das Motiv nicht doppelt zu sehen ist.      */
+  var finale = document.querySelector(".finale");
+  if (finale && "IntersectionObserver" in window) {
+    new window.IntersectionObserver(function (entries) {
+      document.documentElement.classList.toggle("am-ende", entries[0].isIntersecting);
+    }, { rootMargin: "0px 0px -25% 0px" }).observe(finale);
+  }
+
   var heroText = document.querySelector(".hero-text");
   if (heroText && !reduceMotion) {
     var ticking = false;
